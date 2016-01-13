@@ -222,7 +222,10 @@
             }
             config || (config = {});//将来扩展配置用，暂时没用
             var strt = _createThisEle(element);//将html保存到全局变量，下次调用直接从全局变量获取
-            document.getElementById(element).innerHTML =_BaseRanderAppend(date, strt);
-
+            if(config["append"]){
+            	document.getElementById(element).innerHTML+=_BaseRanderAppend(date,strt);
+            }else{
+            	document.getElementById(element).innerHTML=_BaseRanderAppend(date,strt)
+            }
         }
     })(window)
