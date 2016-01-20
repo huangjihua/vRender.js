@@ -232,6 +232,29 @@ abcdeft
 角色：小红
 朋友： 小明 小白 
 ```
+##渲染至table，需要外边包一层div标签，然后要借助<!-- -->
+```code
+<div id="view">
+	<table>
+		<tr>
+		<!--{{user[list]}}-->
+			<td>{{name[child]}}  &nbsp;</td>
+		<!--{{user[end]}}-->
+		</tr>
+	</table>
+    <br>
+<br>
+</div>
+<script>
+   var model={user:[{name:"小明"},{name:"小白"}]};
+
+    $.vRander("view", model);
+</script>
+```
+###渲染结果
+```code
+小明 小白 
+```
 ##更多级别的子级object数组
 
 ```code
