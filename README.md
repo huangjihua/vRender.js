@@ -1,8 +1,7 @@
 
 ##vRender.js是什么?
-一个前端渲染库，帮助前端人员轻松将JSON数据渲染至html
-
-兼容jquery ,zepto
+基于原生javascript编写的一个前端渲染库，帮助前端人员轻松将JSON数据渲染至html，纯字符串加正则表达式实现，避免了使用大量dom操作消耗较多性能的问题。
+如含jquery或zepto的情况下，请将vRender.js文件放在其后引用。
 
 ##例子1
 
