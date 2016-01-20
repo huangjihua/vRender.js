@@ -1,8 +1,8 @@
 
 ##vRender.js是什么?
-基于原生javascript编写的一个前端渲染库，帮助前端人员轻松将JSON数据渲染至html<br>
-超轻量，仅6kb,不像angular.js vue.js等大量借助标签的属性进行判断，使用纯字符串加正则表达式实现，避免了使用大量dom操作消耗较多性能的问题<br>
-如含jquery或zepto的情况下，请将vRender.js文件放在其后引用。
+·基于原生javascript编写的一个前端渲染库，帮助前端人员轻松将JSON数据渲染至html<br>
+·超轻量，仅6kb,不像angular.js vue.js等大量借助标签的属性进行判断，使用纯字符串加正则表达式实现，避免了使用大量dom操作消耗较多性能的问题<br>
+·如含jquery或zepto的情况下，请将vRender.js文件放在其后引用。
 
 ##例子1
 
