@@ -63,6 +63,7 @@
                 value=value*1;
             }
             var time = new Date(value);
+
             if (time != "Invalid Date") {
             var o = {
                 "M+": time.getMonth() + 1,
@@ -73,13 +74,13 @@
                 "q+": Math.floor((time.getMonth() + 3) / 3),
                 "S": time.getMilliseconds()
             };
-
-                fmt = fmt.replace(RegExp.$1, (time.getFullYear() + "").substr(4 - RegExp.$1.length));
-
+                if (/(y+)/.test(fmt))
+                    fmt = fmt.replace(RegExp.$1, (time.getFullYear() + "").substr(4 - RegExp.$1.length));
                 for (var k in o)
                     if (new RegExp("(" + k + ")").test(fmt))
                         fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
                 return fmt;
+
             }else{
                 return time+"";
             }
@@ -201,7 +202,7 @@
         }
 
         function _angular(str, msg) {
-            console.log(str.match(_getAll))
+
             while (str.match(_getAll)) {
                 var pstr = str.match(_getAll);
                 var text = pstr[0].replace(_reText, "");
