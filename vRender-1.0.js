@@ -140,18 +140,27 @@
 
         function vCreateChild(data,_attr,str,level){
             var msg=data[_attr]||[];
-            
+            if (_attr.indexOf(".") > -1) {
+                var columnAr = _attr.split('.');
+                var l=columnAr.length;
+                if (data[columnAr[0]] && data[columnAr[0]][columnAr[1]]) {
+                    msg = data[columnAr[0]][columnAr[1]];
+                }
+                for(var i=2;i<=l;i++){
+                    msg[columnAr[i]]&&(msg=msg[columnAr[i]]);
+                }
+            }
 
             var childName = "{{" + _attr + "[list" + level + "]}}", childEnd = "{{" + _attr + "[end" + level + "]}}";
             var childStart = str.indexOf(childName);
             var childend = str.indexOf(childEnd);
-            
-            
+
             if (childStart > -1) {
                 var regstr = str.substring(childStart + childName.length, str.indexOf(childEnd));
                 var l = msg.length;
                 var restultStr = "";
                 var _getNowChild = new RegExp("{{" + _getText + "\\[child" + level + "\\]" + _getType + _getStatus + "}}", "g");
+
                 for (var i = 0; i < l; i++) {
                     var tmp = regstr;
 
@@ -160,7 +169,8 @@
                         var text = pstr[0].replace(_reText, "");
                         var pType = pstr[0].match(_getTypeV);
                         var status = pstr[0].match(_getStatusV);
-                        if (msg[i].constructor ==String){
+
+                        if (msg[i].constructor !=Object){
                            tmp = tmp.replace(pstr[0],msg[i], pType, msg[i])
                         }
                         else{
@@ -180,6 +190,7 @@
             var _getNowList = new RegExp("{{" + _getText + "\\[list" + level + "\\]" + _getType + _getStatus + "}}", "g");
 
             var lkey = tempStr.match(_getNowList);
+
             if (lkey) {
                 var _attr = lkey[0].replace(_reText, "");
                 return vCreateChild(data,_attr,tempStr,level);
@@ -202,7 +213,6 @@
         }
 
         function _angular(str, msg) {
-
             while (str.match(_getAll)) {
                 var pstr = str.match(_getAll);
                 var text = pstr[0].replace(_reText, "");
