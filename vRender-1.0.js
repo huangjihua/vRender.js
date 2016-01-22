@@ -139,6 +139,7 @@
         var _anNum2 = new RegExp("[^\\(\\)]+"), _num = new RegExp("^-{0,1}[0-9]+$");
 
         function vCreateChild(data,_attr,str,level){
+
             var msg=data[_attr]||[];
             if (_attr.indexOf(".") > -1) {
                 var columnAr = _attr.split('.');
@@ -155,7 +156,7 @@
             var childStart = str.indexOf(childName);
             var childend = str.indexOf(childEnd);
 
-            if (childStart > -1) {
+            while (childStart > -1) {
                 var regstr = str.substring(childStart + childName.length, str.indexOf(childEnd));
                 var l = msg.length;
                 var restultStr = "";
@@ -180,10 +181,12 @@
                     tmp=createByLevel(msg[i],tmp,level?level*1+1:level+2);
                     restultStr += tmp;
                 }
-                return str.substring(0, childStart) + restultStr + str.substring(childend + childEnd.length, str.length - 1);
-            }else{
-                return str;
+
+                str=str.substring(0, childStart) + restultStr + str.substring(childend + childEnd.length, str.length - 1);
+                childStart = str.indexOf(childName);
+                childend = str.indexOf(childEnd);
             }
+            return str;
         }
 
         function createByLevel(data,tempStr,level){
@@ -205,7 +208,6 @@
 
                var tempStr = _tempStr;
                tempStr=createByLevel(data[j],tempStr,"");
-
 
                 str +=_angular(tempStr, data[j]);
             }
