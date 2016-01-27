@@ -123,23 +123,26 @@
 
         return value||nodata;
     }
-    var _getText = "[^\\n(}})({{)]+";
-    var _getChild = "\\[child[0-9]{0,1}\\]";
-    var _getList = "\\[list[0-9]{0,1}\\]";
-    var _getType = "\(\\([^\\n(}})({{)]+\\)\){0,1}";
-    var _getTypeV = "\(\\([^\\n(}})({{)]+\\)\)";
+    var _outType=["{{","}}"];
+    var _getText,_getChild,_getList,_getType,_getTypeV,_getStatus,_getStatusV,_reText,_canRe,_getAllChild,_getAllList,_getAll,_anNum2;
+    function createRegex(){
+        _getText = "[^\\n("+_outType[1]+")("+_outType[0]+")]+";
+        _getChild = "\\[child[0-9]{0,1}\\]";
+        _getList = "\\[list[0-9]{0,1}\\]";
+        _getType = "\(\\([^\\n("+_outType[1]+")("+_outType[0]+")]+\\)\){0,1}";
+        _getTypeV = "\(\\([^\\n("+_outType[1]+")("+_outType[0]+")]+\\)\)";
 
-    var _getStatus = "\({[^\\n]+}\){0,1}";
-    var _getStatusV = "\({[^\\n{}]+[:,]+[^\\n{}]+}\){1}";
+        _getStatus = "\({[^\\n]+}\){0,1}";
+        _getStatusV = "\({[^\\n{}]+[:,]+[^\\n{}]+}\){1}";
 
-
-    var _reText = new RegExp(_getStatusV + "|\([{]{2}|[}]{2}\)|" + _getChild + "|" + _getList + "|" + _getType, "g");
-    var _canRe = new RegExp("[{]{2}|[}]{2}|" + _getChild + "|\\([^\\n]+\\)}}", "g");
-    var _getAllChild = new RegExp("{{" + _getText + _getChild + _getType + _getStatus + "}}", "g");
-    var _getAllList = new RegExp("{{" + _getText + _getList + _getType + _getStatus + "}}", "g");
-    var _getAll = new RegExp("{{" + _getText + _getType + _getStatus + "}}", "g");
-    var _anNum2 = new RegExp("[^\\(\\)]+"), _num = new RegExp("^-{0,1}[0-9]+$");
-
+        _reText = new RegExp(_getStatusV + "|\("+_outType[0]+"|"+_outType[1]+"\)|" + _getChild + "|" + _getList + "|" + _getType, "g");
+        _canRe = new RegExp(_outType[0]+"|"+_outType[1]+"|" + _getChild + "|\\([^\\n]+\\)}}", "g");
+        _getAllChild = new RegExp(_outType[0] + _getText + _getChild + _getType + _getStatus +_outType[1], "g");
+        _getAllList = new RegExp(_outType[0] + _getText + _getList + _getType + _getStatus + _outType[1], "g");
+        _getAll = new RegExp(_outType[0] + _getText + _getType + _getStatus + _outType[1], "g");
+        _anNum2 = new RegExp("[^\\(\\)]+"), _num = new RegExp("^-{0,1}[0-9]+$");
+    }
+    createRegex();
     function vCreateChild(data,_attr,str,level){
 
         var msg=data[_attr]||[];
@@ -154,7 +157,7 @@
             }
         }
 
-        var childName = "{{" + _attr + "[list" + level + "]}}", childEnd = "{{" + _attr + "[end" + level + "]}}";
+        var childName = _outType[0] + _attr + "[list" + level + "]"+_outType[1], childEnd = _outType[0] + _attr + "[end" + level + "]"+_outType[1];
         var childStart = str.indexOf(childName);
         var childend = str.indexOf(childEnd);
 
@@ -162,7 +165,7 @@
             var regstr = str.substring(childStart + childName.length, str.indexOf(childEnd));
             var l = msg.length;
             var restultStr = "";
-            var _getNowChild = new RegExp("{{" + _getText + "\\[child" + level + "\\]" + _getType + _getStatus + "}}", "g");
+            var _getNowChild = new RegExp(_outType[0] + _getText + "\\[child" + level + "\\]" + _getType + _getStatus + _outType[1], "g");
 
             for (var i = 0; i < l; i++) {
                 var tmp = regstr;
@@ -192,7 +195,7 @@
     }
 
     function createByLevel(data,tempStr,level){
-        var _getNowList = new RegExp("{{" + _getText + "\\[list" + level + "\\]" + _getType + _getStatus + "}}", "g");
+        var _getNowList = new RegExp(_outType[0] + _getText + "\\[list" + level + "\\]" + _getType + _getStatus + _outType[1], "g");
 
         var lkey = tempStr.match(_getNowList);
 
@@ -207,10 +210,8 @@
         dl =dl?dl:data.length;
         var str = "";
         for (var j = 0; j < dl; j++) {
-
             var tempStr = _tempStr;
             tempStr=createByLevel(data[j],tempStr,"");
-
             str +=_angular(tempStr, data[j]);
         }
         return str;
@@ -237,10 +238,23 @@
         if(date.constructor!=Array){date=[date]}
         config||(config={});
         var strt=_createThisEle(element);
+        if(config["delimiters"]&&Array.isArray(config["delimiters"])&&config["delimiters"].length>1){
+            _outType=config["delimiters"];
+            createRegex();
+        }
         if(config["append"]){
             document.getElementById(element).innerHTML+=_BaseRanderAppend(date,strt);
         }else{
             document.getElementById(element).innerHTML=_BaseRanderAppend(date,strt)
         }
+    }
+    e.$.vRenderStr=function(str,model,config){
+        if(model.constructor!=Array){model=[model]}
+        config||(config={});
+        if(config["delimiters"]&&Array.isArray(config["delimiters"])&&config["delimiters"].length>1){
+            _outType=config["delimiters"];
+            createRegex();
+        }
+        return _BaseRanderAppend(model,str);
     }
 })(window)
