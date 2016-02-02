@@ -41,18 +41,21 @@
                 } else {
 
                     if (typeof (window[dataType]) == "function") {
-
                         return window[dataType](value);
                     }
                     else if (typeof (window[dataType.replace("obj_", "")]) == "function") {
-
                         return window[dataType.replace("obj_", "")](msg);
                     }
                     if (/(y+)/.test(dataType)){
                         value = format(dataType, value);
                     }
                     else {
-                        return window[dataType];
+                        if(window[dataType]==undefined){
+                            return "";
+                        }else{
+                            return window[dataType];
+                        }
+
                     }
                 }
             }
@@ -88,8 +91,9 @@
         }
     }
     function _createValue(columnValue, data, status) {
+
         var nodata = "";
-        var value = data[columnValue]|| (typeof(data[columnValue])=="number"?data[columnValue]:"");
+        var value = data[columnValue]!=undefined?data[columnValue]:"";
 
         if (columnValue.indexOf("||") > -1) {
             nodata = columnValue.split("||")[1];
@@ -99,13 +103,13 @@
         if (columnValue.indexOf(".") > -1) {
             var columnAr = columnValue.split('.');
             var l=columnAr.length;
-            if (data[columnAr[0]] && data[columnAr[0]][columnAr[1]]) {
+            if (data[columnAr[0]]!=undefined && data[columnAr[0]][columnAr[1]]) {
                 value = data[columnAr[0]][columnAr[1]];
             } else {
                 value = nodata;
             }
             for(var i=2;i<=l;i++){
-                value[columnAr[i]]&&(value=value[columnAr[i]]);
+                value[columnAr[i]]!=undefined&&(value=value[columnAr[i]]);
             }
         }
 
@@ -120,8 +124,7 @@
                 }
             }
         }
-
-        return value||nodata;
+        return value!=undefined?value:nodata;
     }
     var _outType=["{{","}}"];
     var _getText,_getChild,_getList,_getType,_getTypeV,_getStatus,_getStatusV,_reText,_canRe,_getAllChild,_getAllList,_getAll,_anNum2;
@@ -237,14 +240,18 @@
     e.$.vRender=function(element,date,config){
         if(date.constructor!=Array){date=[date]}
         config||(config={});
-        var strt=_createThisEle(element);
+        var strt=config["viewStr"]?config["viewStr"]:_createThisEle(config["view"]?config["view"]:element);
         if(config["delimiters"]&&Array.isArray(config["delimiters"])&&config["delimiters"].length>1){
             _outType=config["delimiters"];
             createRegex();
         }
-        if(config["append"]){
+        if(config["append"]&&config["append"]!=-1){
             document.getElementById(element).innerHTML+=_BaseRanderAppend(date,strt);
-        }else{
+        }
+	else if(config["append"]==-1){
+		document.getElementById(element).innerHTML=_BaseRanderAppend(date,strt)+document.getElementById(element).innerHTML;	
+	}
+	else{
             document.getElementById(element).innerHTML=_BaseRanderAppend(date,strt)
         }
     }
