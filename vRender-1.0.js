@@ -1,8 +1,7 @@
 (function (e) {
     e.$ || (e.$ = {});
 
-    function _createpType(value, dataType, msg) {
-
+    function _createpType(value, dataType, msg,columnValue) {
         dataType && (dataType = dataType[0])
         if (dataType == "(time)") {
             if(_num.test(value)){
@@ -28,23 +27,22 @@
         }
         else {
             if (dataType) {
-
                 dataType = dataType.replace(_rdkh, "");
-
-                if (_num.test(dataType) === true) {
-                    if (1 * dataType > 0) {
-                        value = value.substring(0, 1 * dataType) + "...";
+                if (_num.test(dataType)) {
+                    dataType=dataType*1;
+                    if (dataType > 0&&value.length>dataType) {
+                        value = value.substring(0, dataType) + "...";
                     }
-                    else {
+                    else if(dataType<0&&value.length>-1*dataType){
                         value = "*" + value.substring(-1 * dataType, value.length);
                     }
                 } else {
 
                     if (typeof (window[dataType]) == "function") {
-                        return window[dataType](value);
+                        return window[dataType](value,columnValue);
                     }
                     else if (typeof (window[dataType.replace("obj_", "")]) == "function") {
-                        return window[dataType.replace("obj_", "")](msg);
+                        return window[dataType.replace("obj_", "")](msg,columnValue);
                     }
                     if (/(y+)/.test(dataType)){
                         value = format(dataType, value);
@@ -87,11 +85,10 @@
             return fmt;
 
         }else{
-            return time+"";
+            return "";
         }
     }
     function _createValue(columnValue, data, status) {
-
         var nodata = "";
         var value = data[columnValue]!=undefined?data[columnValue]:"";
 
@@ -183,7 +180,7 @@
                         tmp = tmp.replace(pstr[0],msg[i], pType, msg[i])
                     }
                     else{
-                        tmp = tmp.replace(pstr[0], _createpType(_createValue(text, msg[i], status), pType, msg[i]))
+                        tmp = tmp.replace(pstr[0], _createpType(_createValue(text, msg[i], status), pType, msg[i],text))
                     }
                 }
                 tmp=createByLevel(msg[i],tmp,level?level*1+1:level+2);
@@ -226,7 +223,7 @@
             var text = pstr[0].replace(_reText, "");
             var status = pstr[0].match(_getStatusV);
             var pType = pstr[0].match(_getTypeV);
-            str = str.replace(pstr[0], _createpType(_createValue(text, msg, status), pType, msg));
+            str = str.replace(pstr[0], _createpType(_createValue(text, msg, status), pType, msg,text));
         }
         return str;
     }
