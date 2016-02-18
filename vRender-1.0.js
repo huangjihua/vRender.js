@@ -1,6 +1,5 @@
 (function (e) {
     e.$ || (e.$ = {});
-
     function _createpType(value, dataType, msg,columnValue) {
         dataType && (dataType = dataType[0])
         if (dataType == "(time)") {
@@ -66,7 +65,6 @@
             value=value*1;
         }
         var time = new Date(value);
-
         if (time != "Invalid Date") {
             var o = {
                 "M+": time.getMonth() + 1,
@@ -87,8 +85,9 @@
         }else{
             return "";
         }
+
     }
-    function _createValue(columnValue, data, status) {
+    function _judge(columnValue, data){
         var nodata = "";
         var value = data[columnValue]!=undefined?data[columnValue]:"";
 
@@ -109,6 +108,18 @@
                 value[columnAr[i]]!=undefined&&(value=value[columnAr[i]]);
             }
         }
+        return value!=undefined?value:nodata
+    }
+
+    function _createValue(columnValue, data, status) {
+        var arg1=columnValue.indexOf("?"),arg2=columnValue.indexOf(":");
+        if(arg1>-1&&arg2>-1){
+            if(_judge(columnValue.substring(0,arg1),data)){
+                value=_judge(columnValue.substring(arg1+1,arg2),data);
+            }else{
+                value=_judge(columnValue.substring(arg2+1,columnValue.length),data);
+            }
+        }
 
         if (status) {
             status = status[0];
@@ -121,7 +132,7 @@
                 }
             }
         }
-        return value!=undefined?value:nodata;
+        return value;
     }
     var _outType=["{{","}}"];
     var _getText,_getChild,_getList,_getType,_getTypeV,_getStatus,_getStatusV,_reText,_canRe,_getAllChild,_getAllList,_getAll,_anNum2;
