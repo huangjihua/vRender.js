@@ -113,12 +113,15 @@
 
     function _createValue(columnValue, data, status) {
         var arg1=columnValue.indexOf("?"),arg2=columnValue.indexOf(":");
+        var value="";
         if(arg1>-1&&arg2>-1){
             if(_judge(columnValue.substring(0,arg1),data)){
                 value=_judge(columnValue.substring(arg1+1,arg2),data);
             }else{
                 value=_judge(columnValue.substring(arg2+1,columnValue.length),data);
             }
+        }else{
+            value=data[columnValue];
         }
 
         if (status) {
@@ -132,7 +135,7 @@
                 }
             }
         }
-        return value;
+        return value!=undefined?value:"";
     }
     var _outType=["{{","}}"];
     var _getText,_getChild,_getList,_getType,_getTypeV,_getStatus,_getStatusV,_reText,_canRe,_getAllChild,_getAllList,_getAll,_anNum2;
