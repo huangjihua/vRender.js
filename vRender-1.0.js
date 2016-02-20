@@ -88,42 +88,42 @@
 
     }
     function _judge(columnValue, data){
-        var nodata = "";
-        var value = data[columnValue]!=undefined?data[columnValue]:"";
-
-        if (columnValue.indexOf("||") > -1) {
-            nodata = columnValue.split("||")[1];
-            value = data[columnValue.split("||")[0]]
-        }
-
+        var value;
         if (columnValue.indexOf(".") > -1) {
             var columnAr = columnValue.split('.');
             var l=columnAr.length;
             if (data[columnAr[0]]!=undefined && data[columnAr[0]][columnAr[1]]) {
                 value = data[columnAr[0]][columnAr[1]];
             } else {
-                value = nodata;
+                value = "";
             }
             for(var i=2;i<=l;i++){
                 value[columnAr[i]]!=undefined&&(value=value[columnAr[i]]);
             }
+        }else{
+            value=data[columnValue]!=undefined?data[columnValue]:"";
         }
-        return value!=undefined?value:nodata
+        return value;
     }
 
     function _createValue(columnValue, data, status) {
+        var value="",nodata = "";
         var arg1=columnValue.indexOf("?"),arg2=columnValue.indexOf(":");
-        var value="";
-        if(arg1>-1&&arg2>-1){
+        if (columnValue.indexOf("||") > -1) {
+            var columnsplit=columnValue.split("||");
+            nodata = columnsplit[1];
+            value = _judge(columnsplit[0],data);
+            columnValue=columnsplit[0];
+        }
+        else if(arg1>-1&&arg2>-1){
             if(_judge(columnValue.substring(0,arg1),data)){
                 value=_judge(columnValue.substring(arg1+1,arg2),data);
             }else{
                 value=_judge(columnValue.substring(arg2+1,columnValue.length),data);
             }
         }else{
-            value=data[columnValue];
+            value=_judge(columnValue,data);
         }
-
         if (status) {
             status = status[0];
             var p = status.replace(_rdkh, "").split(",");
@@ -135,7 +135,8 @@
                 }
             }
         }
-        return value!=undefined?value:"";
+
+        return (value&&value!=0)?value:nodata;
     }
     var _outType=["{{","}}"];
     var _getText,_getChild,_getList,_getType,_getTypeV,_getStatus,_getStatusV,_reText,_canRe,_getAllChild,_getAllList,_getAll,_anNum2;
