@@ -1,6 +1,7 @@
 (function (e) {
     e.$ || (e.$ = {});
     function _createpType(value, dataType, msg,columnValue) {
+
         dataType && (dataType = dataType[0])
         if (dataType == "(time)") {
             if(_num.test(value)){
@@ -29,38 +30,39 @@
                 dataType = dataType.replace(_rdkh, "");
                 if (_num.test(dataType)) {
                     dataType=dataType*1;
+                    if(Array.isArray(value)){
+                        value=value.join(",");
+                    }
                     if (dataType > 0&&value.length>dataType) {
-                        if(Array.isArray(value)){
-                            value=value.join(",");
-                        }
                         value = value.substring(0, dataType) + "...";
                     }
                     else if(dataType<0&&value.length>-1*dataType){
                         value = "*" + value.substring(-1 * dataType, value.length);
                     }
                 } else {
-
-                    if (typeof (config[dataType]) == "function") {
-                        return config[dataType](value,columnValue);
-                    }
-                    else if (typeof (config[dataType.replace("obj_", "")]) == "function") {
-                        return config[dataType.replace("obj_", "")](msg,columnValue);
-                    }
+                    value=_ifFunc(dataType,window,msg,columnValue,value);
+                    value=value==undefined?(config&&_ifFunc(dataType,config,msg,columnValue,value)):value;
                     if (/(y+)/.test(dataType)){
                         value = format(dataType, value);
-                    }
-                    else {
-                        if(config[dataType]==undefined){
-                            return "";
-                        }else{
-                            return config[dataType];
-                        }
+                    }else{
 
                     }
                 }
             }
         }
         return value;
+    }
+    function _ifFunc(dataType,con,msg,columnValue,value){
+        if(con&&(con[dataType]||con[dataType.replace("obj_", "")])){
+            if (typeof (con[dataType]) == "function") {
+                return con[dataType](value,columnValue);
+            }
+            else if (typeof (con[dataType.replace("obj_", "")]) == "function") {
+                return con[dataType.replace("obj_", "")](msg,columnValue);
+            }else{
+                return "";
+            }
+        }else{return "";}
     }
     var _rdkh = new RegExp("^[{(]|[)}]$", "g");
     function format(fmt,value){
@@ -92,11 +94,10 @@
     }
     function _judge(columnValue, data){
         var value;
-
         if(_strReg.test(columnValue)){
-            value=columnValue.replace(_strRe,"");
-        }
-        else if (columnValue.indexOf(".") > -1) {
+            value=columnValue.replace(_strRegV,"");
+        }else{
+        if (columnValue.indexOf(".") > -1) {
             var columnAr = columnValue.split('.');
             var l=columnAr.length;
             if (data[columnAr[0]]!=undefined && data[columnAr[0]][columnAr[1]]) {
@@ -110,6 +111,8 @@
         }else{
             value=data[columnValue]!=undefined?data[columnValue]:"";
         }
+        }
+
         return value;
     }
 
@@ -147,8 +150,8 @@
         return (value&&value!=0)?value:nodata;
     }
     var _outType=["{{","}}"];
-    var _strReg=new RegExp("^[\"\']{1}[^\r]+[\"\']{1}$");
-    var _strRe=new RegExp("^[\"\']{1}|[\"\']{1}$","g");
+    var _strReg=new RegExp("^[\'\"]{1}[^\r]+[\'\"]{1}$");
+    var _strRegV=new RegExp("^[\'\"]{1}|[\'\"]{1}$","g");
     var _getText,_getChild,_getList,_getType,_getTypeV,_getStatus,_getStatusV,_reText,_canRe,_getAllChild,_getAllList,_getAll,_anNum2;
     function createRegex(){
         _getText = "[^\\n("+_outType[1]+")("+_outType[0]+")]+";
@@ -270,10 +273,10 @@
         if(config["append"]&&config["append"]!=-1){
             document.getElementById(element).innerHTML+=_BaseRanderAppend(date,strt);
         }
-	else if(config["append"]==-1){
-		document.getElementById(element).innerHTML=_BaseRanderAppend(date,strt)+document.getElementById(element).innerHTML;	
-	}
-	else{
+        else if(config["append"]==-1){
+            document.getElementById(element).innerHTML=_BaseRanderAppend(date,strt)+document.getElementById(element).innerHTML;
+        }
+        else{
             document.getElementById(element).innerHTML=_BaseRanderAppend(date,strt)
         }
     }
