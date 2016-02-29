@@ -30,6 +30,9 @@
                 if (_num.test(dataType)) {
                     dataType=dataType*1;
                     if (dataType > 0&&value.length>dataType) {
+                        if(Array.isArray(value)){
+                            value=value.join(",");
+                        }
                         value = value.substring(0, dataType) + "...";
                     }
                     else if(dataType<0&&value.length>-1*dataType){
@@ -37,20 +40,20 @@
                     }
                 } else {
 
-                    if (typeof (window[dataType]) == "function") {
-                        return window[dataType](value,columnValue);
+                    if (typeof (config[dataType]) == "function") {
+                        return config[dataType](value,columnValue);
                     }
-                    else if (typeof (window[dataType.replace("obj_", "")]) == "function") {
-                        return window[dataType.replace("obj_", "")](msg,columnValue);
+                    else if (typeof (config[dataType.replace("obj_", "")]) == "function") {
+                        return config[dataType.replace("obj_", "")](msg,columnValue);
                     }
                     if (/(y+)/.test(dataType)){
                         value = format(dataType, value);
                     }
                     else {
-                        if(window[dataType]==undefined){
+                        if(config[dataType]==undefined){
                             return "";
                         }else{
-                            return window[dataType];
+                            return config[dataType];
                         }
 
                     }
@@ -89,7 +92,11 @@
     }
     function _judge(columnValue, data){
         var value;
-        if (columnValue.indexOf(".") > -1) {
+
+        if(_strReg.test(columnValue)){
+            value=columnValue.replace(_strRe,"");
+        }
+        else if (columnValue.indexOf(".") > -1) {
             var columnAr = columnValue.split('.');
             var l=columnAr.length;
             if (data[columnAr[0]]!=undefined && data[columnAr[0]][columnAr[1]]) {
@@ -108,14 +115,15 @@
 
     function _createValue(columnValue, data, status) {
         var value="",nodata = "";
-        var arg1=columnValue.indexOf("?"),arg2=columnValue.indexOf(":");
         if (columnValue.indexOf("||") > -1) {
             var columnsplit=columnValue.split("||");
             nodata = columnsplit[1];
             value = _judge(columnsplit[0],data);
             columnValue=columnsplit[0];
         }
-        else if(arg1>-1&&arg2>-1){
+
+        var arg1=columnValue.indexOf("?"),arg2=columnValue.indexOf(":");
+        if(arg1>-1&&arg2>-1){
             if(_judge(columnValue.substring(0,arg1),data)){
                 value=_judge(columnValue.substring(arg1+1,arg2),data);
             }else{
@@ -139,6 +147,8 @@
         return (value&&value!=0)?value:nodata;
     }
     var _outType=["{{","}}"];
+    var _strReg=new RegExp("^[\"\']{1}[^\r]+[\"\']{1}$");
+    var _strRe=new RegExp("^[\"\']{1}|[\"\']{1}$","g");
     var _getText,_getChild,_getList,_getType,_getTypeV,_getStatus,_getStatusV,_reText,_canRe,_getAllChild,_getAllList,_getAll,_anNum2;
     function createRegex(){
         _getText = "[^\\n("+_outType[1]+")("+_outType[0]+")]+";
@@ -267,7 +277,9 @@
             document.getElementById(element).innerHTML=_BaseRanderAppend(date,strt)
         }
     }
-    e.$.vRenderStr=function(str,model,config){
+    var config;
+    e.$.vRenderStr=function(str,model,_config){
+        config=_config;
         if(model.constructor!=Array){model=[model]}
         config||(config={});
         if(config["delimiters"]&&Array.isArray(config["delimiters"])&&config["delimiters"].length>1){
