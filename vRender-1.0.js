@@ -1,8 +1,13 @@
 (function (e) {
+    Array.prototype.each=function(e){
+        var l=this.length;
+        for(var i=0;i<l;i++){
+            e(this[i]);
+        }
+    }
     e.$ || (e.$ = {});
     function _createpType(value, dataType, msg,columnValue) {
-
-        dataType && (dataType = dataType[0])
+        dataType && (dataType = dataType[0]);
         if (dataType == "(time)") {
             if(_num.test(value)){
                 value=value*1;
@@ -99,24 +104,23 @@
         }else{
         if (columnValue.indexOf(".") > -1) {
             var columnAr = columnValue.split('.');
-            var l=columnAr.length;
             if (data[columnAr[0]]!=undefined && data[columnAr[0]][columnAr[1]]) {
-                value = data[columnAr[0]][columnAr[1]];
+                value =data[columnAr[0]][columnAr[1]];
             } else {
                 value = "";
             }
-            for(var i=2;i<=l;i++){
-                value[columnAr[i]]!=undefined&&(value=value[columnAr[i]]);
-            }
+            columnAr.each(function(columnAri){
+                value[columnAri]!=undefined&&(value=value[columnAri]);
+            });
         }else{
-            value=data[columnValue]!=undefined?data[columnValue]:"";
+            value=data[columnValue];
         }
         }
-
         return value;
     }
 
     function _createValue(columnValue, data, status) {
+
         var value="",nodata = "";
         if (columnValue.indexOf("||") > -1) {
             var columnsplit=columnValue.split("||");
@@ -146,7 +150,6 @@
                 }
             }
         }
-
         return (value&&value!=0)?value:nodata;
     }
     var _outType=["{{","}}"];
@@ -180,9 +183,9 @@
             if (data[columnAr[0]] && data[columnAr[0]][columnAr[1]]) {
                 msg = data[columnAr[0]][columnAr[1]];
             }
-            for(var i=2;i<=l;i++){
-                msg[columnAr[i]]&&(msg=msg[columnAr[i]]);
-            }
+            columnAr.each(function(columnAri){
+                msg[columnAri]&&(msg=msg[columnAri]);
+            });
         }
 
         var childName = _outType[0] + _attr + "[list" + level + "]"+_outType[1], childEnd = _outType[0] + _attr + "[end" + level + "]"+_outType[1];
@@ -195,25 +198,24 @@
             var restultStr = "";
             var _getNowChild = new RegExp(_outType[0] + _getText + "\\[child" + level + "\\]" + _getType + _getStatus + _outType[1], "g");
 
-            for (var i = 0; i < l; i++) {
+            msg.each(function(msgi){
                 var tmp = regstr;
-
-                while (tmp.match(_getNowChild)) {
-                    var pstr = tmp.match(_getNowChild);
-                    var text = pstr[0].replace(_reText, "");
-                    var pType = pstr[0].match(_getTypeV);
-                    var status = pstr[0].match(_getStatusV);
-
-                    if (msg[i].constructor !=Object){
-                        tmp = tmp.replace(pstr[0],msg[i], pType, msg[i])
+                var pstrs=tmp.match(_getNowChild);
+                pstrs.each(function(pstr){
+                    var text = pstr.replace(_reText, "");
+                    var pType = pstr.match(_getTypeV);
+                    var status = pstr.match(_getStatusV);
+                    if (msgi.constructor !=Object){
+                        tmp = tmp.replace(pstr,msgi, pType, msgi)
                     }
                     else{
-                        tmp = tmp.replace(pstr[0], _createpType(_createValue(text, msg[i], status), pType, msg[i],text))
+                        tmp = tmp.replace(pstr, _createpType(_createValue(text,msgi, status), pType,msgi,text))
                     }
-                }
-                tmp=createByLevel(msg[i],tmp,level?level*1+1:level+2);
+                });
+
+                tmp=createByLevel(msgi,tmp,level?level*1+1:level+2);
                 restultStr += tmp;
-            }
+            });
 
             str=str.substring(0, childStart) + restultStr + str.substring(childend + childEnd.length, str.length - 1);
             childStart = str.indexOf(childName);
@@ -224,11 +226,11 @@
 
     function createByLevel(data,tempStr,level){
         var _getNowList = new RegExp(_outType[0] + _getText + "\\[list" + level + "\\]" + _getType + _getStatus + _outType[1], "g");
-
         var lkey = tempStr.match(_getNowList);
 
         if (lkey) {
             var _attr = lkey[0].replace(_reText, "");
+
             return vCreateChild(data,_attr,tempStr,level);
         }else{
             return tempStr;
@@ -237,22 +239,21 @@
     function _BaseRanderAppend(data, _tempStr,dl) {
         dl =dl?dl:data.length;
         var str = "";
-        for (var j = 0; j < dl; j++) {
+        data.each(function(dataj){
             var tempStr = _tempStr;
-            tempStr=createByLevel(data[j],tempStr,"");
-            str +=_angular(tempStr, data[j]);
-        }
+            tempStr=createByLevel(dataj,tempStr,"");
+            str +=_angular(tempStr,dataj);
+        });
         return str;
     }
 
     function _angular(str, msg) {
-        while (str.match(_getAll)) {
-            var pstr = str.match(_getAll);
-            var text = pstr[0].replace(_reText, "");
-            var status = pstr[0].match(_getStatusV);
-            var pType = pstr[0].match(_getTypeV);
-            str = str.replace(pstr[0], _createpType(_createValue(text, msg, status), pType, msg,text));
-        }
+        var pstrs=str.match(_getAll);
+        pstrs.each(function(pstr){
+            var text = pstr.replace(_reText, "");
+            str = str.replace(pstr, _createpType(_createValue(text, msg, pstr.match(_getStatusV)), pstr.match(_getTypeV), msg,text));
+        });
+
         return str;
     }
 
@@ -262,16 +263,20 @@
         }
         return window["v" + element];
     }
+
     e.$.vRender=function(element,date,config){
         if(date.constructor!=Array){date=[date]}
         config||(config={});
-        var strt=config["viewStr"]?config["viewStr"]:_createThisEle(config["view"]?config["view"]:element);
+            var strt = config["viewStr"] ? config["viewStr"] : _createThisEle(config["view"] ? config["view"] : element);
+
         if(config["delimiters"]&&Array.isArray(config["delimiters"])&&config["delimiters"].length>1){
             _outType=config["delimiters"];
             createRegex();
         }
         if(config["append"]&&config["append"]!=-1){
-            document.getElementById(element).innerHTML+=_BaseRanderAppend(date,strt);
+            var strs=_BaseRanderAppend(date,strt);
+            document.getElementById(element).innerHTML+=strs;
+
         }
         else if(config["append"]==-1){
             document.getElementById(element).innerHTML=_BaseRanderAppend(date,strt)+document.getElementById(element).innerHTML;
