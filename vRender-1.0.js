@@ -1,4 +1,5 @@
 (function (e) {
+    "use strict";
     Array.prototype.each=function(e){
         var l=this.length;
         for(var i=0;i<l;i++){
@@ -155,7 +156,7 @@
     var _outType=["{{","}}"];
     var _strReg=new RegExp("^[\'\"]{1}[^\r]+[\'\"]{1}$");
     var _strRegV=new RegExp("^[\'\"]{1}|[\'\"]{1}$","g");
-    var _getText,_getChild,_getList,_getType,_getTypeV,_getStatus,_getStatusV,_reText,_canRe,_getAllChild,_getAllList,_getAll,_anNum2;
+    var _getText,_getChild,_getList,_getType,_getTypeV,_getStatus,_getStatusV,_reText,_canRe,_getAllChild,_getAllList,_getAll,_anNum2,_num;
     function createRegex(){
         _getText = "[^\\n("+_outType[1]+")("+_outType[0]+")]+";
         _getChild = "\\[child[0-9]{0,1}\\]";
