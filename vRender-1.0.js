@@ -1,12 +1,12 @@
 (function (e) {
     "use strict";
+    e.$ || (e.$ = {});
     Array.prototype.each=function(e){
         var l=this.length;
         for(var i=0;i<l;i++){
             e(this[i]);
         }
     }
-    e.$ || (e.$ = {});
     function _createpType(value, dataType, msg,columnValue) {
         dataType && (dataType = dataType[0]);
         if (dataType == "(time)") {
@@ -46,6 +46,7 @@
                         value = "*" + value.substring(-1 * dataType, value.length);
                     }
                 } else {
+
                     value=_ifFunc(dataType,window,msg,columnValue,value);
                     value=value==undefined?(config&&_ifFunc(dataType,config,msg,columnValue,value)):value;
                     if (/(y+)/.test(dataType)){
@@ -68,7 +69,7 @@
             }else{
                 return "";
             }
-        }else{return "";}
+        }else{return undefined;}
     }
     var _rdkh = new RegExp("^[{(]|[)}]$", "g");
     function format(fmt,value){
@@ -121,6 +122,7 @@
     }
 
     function _createValue(columnValue, data, status) {
+
         var value="",nodata = "";
         if (columnValue.indexOf("||") > -1) {
             var columnsplit=columnValue.split("||");
@@ -128,6 +130,7 @@
             value = _judge(columnsplit[0],data);
             columnValue=columnsplit[0];
         }
+
         var arg1=columnValue.indexOf("?"),arg2=columnValue.indexOf(":");
         if(arg1>-1&&arg2>-1){
             if(_judge(columnValue.substring(0,arg1),data)){
@@ -195,6 +198,7 @@
             var l = msg.length;
             var restultStr = "";
             var _getNowChild = new RegExp(_outType[0] + _getText + "\\[child" + level + "\\]" + _getType + _getStatus + _outType[1], "g");
+
             msg.each(function(msgi){
                 var tmp = regstr;
                 var pstrs=tmp.match(_getNowChild);
@@ -234,11 +238,13 @@
     function _BaseRanderAppend(data, _tempStr,dl) {
         dl =dl?dl:data.length;
         var str = "";
+
         data.each(function(dataj){
             var tempStr = _tempStr;
             tempStr=createByLevel(dataj,tempStr,"");
             str +=_angular(tempStr,dataj);
         });
+
         return str;
     }
 
@@ -260,7 +266,8 @@
         return window["v" + element];
     }
 
-    e.$.vRender=function(element,date,config){
+    e.$.vRender=function(element,date,_config){
+        config=_config;
         if(date.constructor!=Array){date=[date]}
         config||(config={});
             var strt = config["viewStr"] ? config["viewStr"] : _createThisEle(config["view"] ? config["view"] : element);
