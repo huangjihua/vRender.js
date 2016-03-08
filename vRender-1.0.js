@@ -103,25 +103,24 @@
         if(_strReg.test(columnValue)){
             value=columnValue.replace(_strRegV,"");
         }else{
-        if (columnValue.indexOf(".") > -1) {
-            var columnAr = columnValue.split('.');
-            if (data[columnAr[0]]!=undefined && data[columnAr[0]][columnAr[1]]) {
-                value =data[columnAr[0]][columnAr[1]];
-            } else {
-                value = "";
+            if (columnValue.indexOf(".") > -1) {
+                var columnAr = columnValue.split('.');
+                if (data[columnAr[0]]!=undefined && data[columnAr[0]][columnAr[1]]) {
+                    value =data[columnAr[0]][columnAr[1]];
+                } else {
+                    value = "";
+                }
+                columnAr.each(function(columnAri){
+                    value[columnAri]!=undefined&&(value=value[columnAri]);
+                });
+            }else{
+                value=data[columnValue];
             }
-            columnAr.each(function(columnAri){
-                value[columnAri]!=undefined&&(value=value[columnAri]);
-            });
-        }else{
-            value=data[columnValue];
-        }
         }
         return value;
     }
 
     function _createValue(columnValue, data, status) {
-
         var value="",nodata = "";
         if (columnValue.indexOf("||") > -1) {
             var columnsplit=columnValue.split("||");
@@ -129,7 +128,6 @@
             value = _judge(columnsplit[0],data);
             columnValue=columnsplit[0];
         }
-
         var arg1=columnValue.indexOf("?"),arg2=columnValue.indexOf(":");
         if(arg1>-1&&arg2>-1){
             if(_judge(columnValue.substring(0,arg1),data)){
@@ -176,8 +174,7 @@
     }
     createRegex();
     function vCreateChild(data,_attr,str,level){
-
-        var msg=data[_attr]||[];
+        var msg=data?data[_attr]:[];
         if (_attr.indexOf(".") > -1) {
             var columnAr = _attr.split('.');
             var l=columnAr.length;
@@ -198,7 +195,6 @@
             var l = msg.length;
             var restultStr = "";
             var _getNowChild = new RegExp(_outType[0] + _getText + "\\[child" + level + "\\]" + _getType + _getStatus + _outType[1], "g");
-
             msg.each(function(msgi){
                 var tmp = regstr;
                 var pstrs=tmp.match(_getNowChild);
@@ -218,7 +214,7 @@
                 restultStr += tmp;
             });
 
-            str=str.substring(0, childStart) + restultStr + str.substring(childend + childEnd.length, str.length - 1);
+            str=str.substring(0, childStart) + restultStr + str.substring(childend + childEnd.length, str.length);
             childStart = str.indexOf(childName);
             childend = str.indexOf(childEnd);
         }
@@ -228,10 +224,8 @@
     function createByLevel(data,tempStr,level){
         var _getNowList = new RegExp(_outType[0] + _getText + "\\[list" + level + "\\]" + _getType + _getStatus + _outType[1], "g");
         var lkey = tempStr.match(_getNowList);
-
         if (lkey) {
             var _attr = lkey[0].replace(_reText, "");
-
             return vCreateChild(data,_attr,tempStr,level);
         }else{
             return tempStr;
@@ -250,11 +244,12 @@
 
     function _angular(str, msg) {
         var pstrs=str.match(_getAll);
-        pstrs.each(function(pstr){
-            var text = pstr.replace(_reText, "");
-            str = str.replace(pstr, _createpType(_createValue(text, msg, pstr.match(_getStatusV)), pstr.match(_getTypeV), msg,text));
-        });
-
+        if(pstrs){
+            pstrs.each(function(pstr){
+                var text = pstr.replace(_reText, "");
+                str = str.replace(pstr, _createpType(_createValue(text, msg, pstr.match(_getStatusV)), pstr.match(_getTypeV), msg,text));
+            });
+        }
         return str;
     }
 
