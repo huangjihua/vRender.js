@@ -152,7 +152,7 @@
                 }
             }
         }
-        return (value&&value!=0)?value:nodata;
+       return (value||value==0)?value:nodata;
     }
     var _outType=["{{","}}"];
     var _strReg=new RegExp("^[\'\"]{1}[^\r]+[\'\"]{1}$");
