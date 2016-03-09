@@ -152,7 +152,7 @@
                 }
             }
         }
-       return (value||value==0)?value:nodata;
+        return (value||value==0)?value:nodata;
     }
     var _outType=["{{","}}"];
     var _strReg=new RegExp("^[\'\"]{1}[^\r]+[\'\"]{1}$");
@@ -177,7 +177,8 @@
     }
     createRegex();
     function vCreateChild(data,_attr,str,level){
-        var msg=data?data[_attr]:[];
+        var msg=(data&&data[_attr])?data[_attr]:[];
+
         if (_attr.indexOf(".") > -1) {
             var columnAr = _attr.split('.');
             var l=columnAr.length;
@@ -270,7 +271,7 @@
         config=_config;
         if(date.constructor!=Array){date=[date]}
         config||(config={});
-            var strt = config["viewStr"] ? config["viewStr"] : _createThisEle(config["view"] ? config["view"] : element);
+        var strt = config["viewStr"] ? config["viewStr"] : _createThisEle(config["view"] ? config["view"] : element);
 
         if(config["delimiters"]&&Array.isArray(config["delimiters"])&&config["delimiters"].length>1){
             _outType=config["delimiters"];
