@@ -165,7 +165,7 @@
         _getType = "\(\\([^\\n("+_outType[1]+")("+_outType[0]+")]+\\)\){0,1}";
         _getTypeV = "\(\\([^\\n("+_outType[1]+")("+_outType[0]+")]+\\)\)";
 
-        _getStatus = "\({[^\\n]+}\){0,1}";
+        _getStatus = "\({[^\\n]+}\){0,1}[\|]{0,2}[^\\n]+";
         _getStatusV = "\({[^\\n{}]+[:,]+[^\\n{}]+}\){1}";
 
         _reText = new RegExp(_getStatusV + "|\("+_outType[0]+"|"+_outType[1]+"\)|" + _getChild + "|" + _getList + "|" + _getType, "g");
