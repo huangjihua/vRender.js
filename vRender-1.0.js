@@ -152,7 +152,7 @@
                 }
             }
         }
-        return (value||value==0)?value:nodata;
+        return (value||value===0)?value:nodata;
     }
     var _outType=["{{","}}"];
     var _strReg=new RegExp("^[\'\"]{1}[^\r]+[\'\"]{1}$");
@@ -165,14 +165,14 @@
         _getType = "\(\\([^\\n("+_outType[1]+")("+_outType[0]+")]+\\)\){0,1}";
         _getTypeV = "\(\\([^\\n("+_outType[1]+")("+_outType[0]+")]+\\)\)";
 
-        _getStatus = "\({[^\\n]+}\){0,1}[\|]{0,2}[^\\n]+";
+        _getStatus = "\({[^\\n]+}\){0,1}";
         _getStatusV = "\({[^\\n{}]+[:,]+[^\\n{}]+}\){1}";
 
         _reText = new RegExp(_getStatusV + "|\("+_outType[0]+"|"+_outType[1]+"\)|" + _getChild + "|" + _getList + "|" + _getType, "g");
         _canRe = new RegExp(_outType[0]+"|"+_outType[1]+"|" + _getChild + "|\\([^\\n]+\\)}}", "g");
         _getAllChild = new RegExp(_outType[0] + _getText + _getChild + _getType + _getStatus +_outType[1], "g");
         _getAllList = new RegExp(_outType[0] + _getText + _getList + _getType + _getStatus + _outType[1], "g");
-        _getAll = new RegExp(_outType[0] + _getText + _getType + _getStatus + _outType[1], "g");
+        _getAll = new RegExp(_outType[0] + _getText + _getType + _getStatus + _outType[1]+"", "g");
         _anNum2 = new RegExp("[^\\(\\)]+"), _num = new RegExp("^-{0,1}[0-9]+$");
     }
     createRegex();
@@ -250,6 +250,7 @@
     }
 
     function _angular(str, msg) {
+        console.log(_getAll)
         var pstrs=str.match(_getAll);
         if(pstrs){
             pstrs.each(function(pstr){
