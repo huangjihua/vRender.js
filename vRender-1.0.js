@@ -250,7 +250,7 @@
     }
 
     function _angular(str, msg) {
-        console.log(_getAll)
+        
         var pstrs=str.match(_getAll);
         if(pstrs){
             pstrs.each(function(pstr){
