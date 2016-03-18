@@ -49,7 +49,7 @@
 
                     value=_ifFunc(dataType,window,msg,columnValue,value);
                     value=value==undefined?(config&&_ifFunc(dataType,config,msg,columnValue,value)):value;
-                    if (/(y+)/.test(dataType)){
+                     if (value==undefined&&/(y+)/.test(dataType)){
                         value = format(dataType, value);
                     }else{
 
@@ -202,8 +202,8 @@
 
             msg.each(function(msgi){
                 var tmp = regstr;
-                var pstrs=tmp.match(_getNowChild);
-                pstrs.each(function(pstr){
+                while(tmp.match(_getNowChild)){
+                    var pstr=tmp.match(_getNowChild)[0];
                     var text = pstr.replace(_reText, "");
                     var pType = pstr.match(_getTypeV);
                     var status = pstr.match(_getStatusV);
@@ -213,7 +213,7 @@
                     else{
                         tmp = tmp.replace(pstr, _createpType(_createValue(text,msgi, status), pType,msgi,text))
                     }
-                });
+                }
 
                 tmp=createByLevel(msgi,tmp,level?level*1+1:level+2);
                 restultStr += tmp;
@@ -250,13 +250,10 @@
     }
 
     function _angular(str, msg) {
-        
-        var pstrs=str.match(_getAll);
-        if(pstrs){
-            pstrs.each(function(pstr){
-                var text = pstr.replace(_reText, "");
-                str = str.replace(pstr, _createpType(_createValue(text, msg, pstr.match(_getStatusV)), pstr.match(_getTypeV), msg,text));
-            });
+        while(str.match(_getAll)){
+            var pstr=str.match(_getAll)[0];
+            var text = pstr.replace(_reText, "");
+            str = str.replace(pstr, _createpType(_createValue(text, msg, pstr.match(_getStatusV)), pstr.match(_getTypeV), msg,text));
         }
         return str;
     }
