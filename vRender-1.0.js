@@ -46,10 +46,27 @@
                         value = "*" + value.substring(-1 * dataType, value.length);
                     }
                 } else {
-
-                    value=_ifFunc(dataType,window,msg,columnValue,value);
-                    value=value==undefined?(config&&_ifFunc(dataType,config,msg,columnValue,value)):value;
-                     if (value==undefined&&/(y+)/.test(dataType)){
+                    var _tbol=true;
+                    var objDataType=dataType.replace("obj_", "");
+                    switch ("function") {
+                        case typeof(config[dataType]):
+                            value = config[dataType](value, columnValue);
+                            _tbol=false;
+                            break;
+                        case typeof(config[objDataType]):
+                            value = config[objDataType](msg, columnValue);
+                            _tbol=false;
+                            break;
+                        case typeof(window[dataType]):
+                            value = window[dataType](value, columnValue);
+                            _tbol=false;
+                            break;
+                        case typeof(window[objDataType]):
+                            value = window[objDataType](msg, columnValue);
+                            _tbol=false;
+                            break;
+                    }
+                    if (_tbol&&/(y+)/.test(dataType)){
                         value = format(dataType, value);
                     }else{
 
@@ -58,18 +75,6 @@
             }
         }
         return value;
-    }
-    function _ifFunc(dataType,con,msg,columnValue,value){
-        if(con&&(con[dataType]||con[dataType.replace("obj_", "")])){
-            if (typeof (con[dataType]) == "function") {
-                return con[dataType](value,columnValue);
-            }
-            else if (typeof (con[dataType.replace("obj_", "")]) == "function") {
-                return con[dataType.replace("obj_", "")](msg,columnValue);
-            }else{
-                return "";
-            }
-        }else{return undefined;}
     }
     var _rdkh = new RegExp("^[{(]|[)}]$", "g");
     function format(fmt,value){
