@@ -90,11 +90,11 @@ hello
 
 ```code
 <div id="view">
-    {{value(time)}}
+    {{time(value)}}
     <br>
-    {{num(shortTime)}}
+    {{shortTime(num)}}
     <br>
-    {{value(yyyy-mm-dd)}}
+    {{yyyy-MM-dd(value)}}
 </div>
 <script>
     var model={value:"2015/12/24 11:22:56",num:1451360409000}
