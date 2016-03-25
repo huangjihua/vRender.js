@@ -1,15 +1,10 @@
 (function (e) {
     "use strict";
-    e.$ || (e.$ = {});
-    Array.prototype.each=function(e){
-        var l=this.length;
-        for(var i=0;i<l;i++){
-            e(this[i]);
-        }
-    }
+    e.vRender || (e.vRender = {});
+    Array.prototype.each=function(e){var l=this.length;for(var i=0;i<l;i++){e(this[i]);}}
     function _createpType(value, dataType, msg,columnValue) {
-        dataType && (dataType = dataType[0]);
-        if (dataType == "(time)") {
+
+        if (dataType == "time") {
             if(_num.test(value)){
                 value=value*1;
             }
@@ -17,7 +12,7 @@
             if (_tm != "Invalid Date") {
                 value = _tm.getFullYear() + "/" + (_tm.getMonth() + 1) + "/" + _tm.getDate() + " " + _tm.getHours() + ":" + _tm.getMinutes() + ":" + _tm.getSeconds()
             }
-        } else if (dataType == "(shortTime)") {
+        } else if (dataType == "shortTime") {
             if(_num.test(value)){
                 value=value*1;
             }
@@ -25,44 +20,22 @@
             if (_tm2 != "Invalid Date") {
                 value = _tm2.getFullYear() + "/" + (_tm2.getMonth() + 1) + "/" + _tm2.getDate();
             }
-        } else if (dataType == "(image)") {
+        } else if (dataType == "image") {
             value = toImgUrl(value);
         }
-        else if (dataType == "(litImage)") {
+        else if (dataType == "litImage") {
             value = toImgUrl(value, 1);
         }
         else {
             if (dataType) {
-                dataType = dataType.replace(_rdkh, "");
-                if (_num.test(dataType)) {
-                    dataType=dataType*1;
-                    if(Array.isArray(value)){
-                        value=value.join(",");
-                    }
-                    if (dataType > 0&&value.length>dataType) {
-                        value = value.substring(0, dataType) + "...";
-                    }
-                    else if(dataType<0&&value.length>-1*dataType){
-                        value = "*" + value.substring(-1 * dataType, value.length);
-                    }
-                } else {
                     var _tbol=true;
-                    var objDataType=dataType.replace("obj_", "");
                     switch ("function") {
                         case typeof(config[dataType]):
-                            value = config[dataType](value, columnValue);
-                            _tbol=false;
-                            break;
-                        case typeof(config[objDataType]):
-                            value = config[objDataType](msg, columnValue);
+                            value = config[dataType](value);
                             _tbol=false;
                             break;
                         case typeof(window[dataType]):
-                            value = window[dataType](value, columnValue);
-                            _tbol=false;
-                            break;
-                        case typeof(window[objDataType]):
-                            value = window[objDataType](msg, columnValue);
+                            value = window[dataType](value);
                             _tbol=false;
                             break;
                     }
@@ -72,7 +45,6 @@
 
                     }
                 }
-            }
         }
         return value;
     }
@@ -106,22 +78,33 @@
     }
     function _judge(columnValue, data){
         var value;
+        if(columnValue=="this"){
+        value=data;
+        }else{
         if(_strReg.test(columnValue)){
             value=columnValue.replace(_strRegV,"");
         }else{
             if (columnValue.indexOf(".") > -1) {
                 var columnAr = columnValue.split('.');
-                if (data[columnAr[0]]!=undefined && data[columnAr[0]][columnAr[1]]) {
-                    value =data[columnAr[0]][columnAr[1]];
-                } else {
-                    value = "";
-                }
+                value=data;
+
                 columnAr.each(function(columnAri){
-                    value[columnAri]!=undefined&&(value=value[columnAri]);
+                    if(typeof (value)=="string"&&_num.test(columnAri)){
+                        columnAri=columnAri*1;
+                        if (columnAri > 0&&value.length>columnAri) {
+                            value = value.substring(0, columnAri) + "...";
+                        }
+                        else if(columnAri<0&&value.length>-1*columnAri){
+                            value = "*" + value.substring(-1 * columnAri, value.length);
+                        }
+                    }else{
+                        value[columnAri]!=undefined&&(value=value[columnAri]);
+                    }
                 });
             }else{
                 value=data[columnValue];
             }
+        }
         }
         return value;
     }
@@ -203,21 +186,25 @@
             var regstr = str.substring(childStart + childName.length, str.indexOf(childEnd));
             var l = msg.length;
             var restultStr = "";
-            var _getNowChild = new RegExp(_outType[0] + _getText + "\\[child" + level + "\\]" + _getType + _getStatus + _outType[1], "g");
-
+            var _getNowChild = new RegExp(_outType[0] + _getText + _getType +"\\[child" + level + "\\]" +  _getStatus + _outType[1], "g");
             msg.each(function(msgi){
                 var tmp = regstr;
                 while(tmp.match(_getNowChild)){
-                    var pstr=tmp.match(_getNowChild)[0];
-                    var text = pstr.replace(_reText, "");
-                    var pType = pstr.match(_getTypeV);
-                    var status = pstr.match(_getStatusV);
-                    if (msgi.constructor !=Object){
-                        tmp = tmp.replace(pstr,msgi, pType, msgi)
-                    }
-                    else{
-                        tmp = tmp.replace(pstr, _createpType(_createValue(text,msgi, status), pType,msgi,text))
-                    }
+                    var pstrs=tmp.match(_getNowChild);
+                    pstrs.each(function(pstr){
+                        var text = pstr.replace(_reText, "");
+                        var vm = pstr.match(_getTypeV);
+                        if(vm){vm=vm[0].replace(/^\(|\)$/g,"")}else{
+                            vm=text;text="";
+                        }
+                        var status = pstr.match(_getStatusV);
+                        if (msgi.constructor !=Object){
+                            tmp = tmp.replace(pstr,msgi, text, msgi)
+                        }
+                        else{
+                            tmp = tmp.replace(pstr, _createpType(_createValue(vm,msgi, status),text,msgi,vm))
+                        }
+                    })
                 }
 
                 tmp=createByLevel(msgi,tmp,level?level*1+1:level+2);
@@ -250,15 +237,20 @@
             tempStr=createByLevel(dataj,tempStr,"");
             str +=_angular(tempStr,dataj);
         });
-
         return str;
     }
 
     function _angular(str, msg) {
         while(str.match(_getAll)){
-            var pstr=str.match(_getAll)[0];
-            var text = pstr.replace(_reText, "");
-            str = str.replace(pstr, _createpType(_createValue(text, msg, pstr.match(_getStatusV)), pstr.match(_getTypeV), msg,text));
+            var pstrs=str.match(_getAll);
+            pstrs.each(function(pstr){
+                var text = pstr.replace(_reText, "");
+                var vm=pstr.match(_getTypeV);
+                if(vm){vm=vm[0].replace(/^\(|\)$/g,"")}else{
+                    vm=text;text="";
+                }
+                str = str.replace(pstr, _createpType(_createValue(vm, msg, pstr.match(_getStatusV)),text, msg,vm));
+            })
         }
         return str;
     }
@@ -270,30 +262,23 @@
         return window["v" + element];
     }
 
-    e.$.vRender=function(element,date,_config){
+    function Render(element,date,_config){
         config=_config;
-        if(date.constructor!=Array){date=[date]}
         config||(config={});
         var strt = config["viewStr"] ? config["viewStr"] : _createThisEle(config["view"] ? config["view"] : element);
-
-        if(config["delimiters"]&&Array.isArray(config["delimiters"])&&config["delimiters"].length>1){
-            _outType=config["delimiters"];
-            createRegex();
-        }
         if(config["append"]&&config["append"]!=-1){
-            var strs=_BaseRanderAppend(date,strt);
-            document.getElementById(element).innerHTML+=strs;
-
+            strt+=vRender.renderStr(strt,date,_config);
         }
         else if(config["append"]==-1){
-            document.getElementById(element).innerHTML=_BaseRanderAppend(date,strt)+document.getElementById(element).innerHTML;
+            strt=vRender.renderStr(strt,date,_config)+strt;
         }
         else{
-            document.getElementById(element).innerHTML=_BaseRanderAppend(date,strt)
+            strt=vRender.renderStr(strt,date,_config);
         }
+        document.getElementById(element).innerHTML=strt;
     }
     var config;
-    e.$.vRenderStr=function(str,model,_config){
+    e.vRender.renderStr=function(str,model,_config){
         config=_config;
         if(model.constructor!=Array){model=[model]}
         config||(config={});
@@ -303,4 +288,61 @@
         }
         return _BaseRanderAppend(model,str);
     }
+    function __defineProperty(date,vm,arg,back){
+        date.__ob__[vm]=date[vm];
+        Object.defineProperty(date,vm,{
+             set:function(e){
+                 this.__ob__[vm]=e;
+                 var obj={};
+                 back.__listen__[vm]&&back.__listen__[vm].apply(obj,arguments);
+                 for(var b in obj){
+                     this.__ob__[b]=obj[b];
+                 }
+                 Render.apply(this,arg);
+             },
+             get:function(){
+                 return this.__ob__[vm];
+             }
+         })
+    }
+    function __observe(date,arg,back){
+        Object.observe(date,function(e){
+            if(e[e.length-1].type=="update"){
+                var obj={};
+                var vm=e[e.length-1].name;
+                back.__listen__[vm]&&back.__listen__[vm].call(obj,date[vm]);
+                for(var b in obj){
+                    delete date[b];
+                    date[b]=obj[b];
+                }
+                Render.apply({},arg);
+            }
+        })
+    }
+    e.vRender.render=function (el,o,config){
+        var Arg=arguments;
+        var back={__listen__:{},$watch:function(a,callback){
+            if(typeof (a)=="string"){
+                this.__listen__[a]=callback;
+            }
+        }};
+        function __dp(date,arg,back){
+            date.__ob__={};
+            if(Object.observe){
+                __observe(date,arg,back);
+            }else{
+                for(var vm in date){(vm!="__ob__"&&vm!="__listen__")&&__defineProperty(date,vm,arg,back);}
+            }
+        }
+        Render(el, o,config);
+        if(Array.isArray(o)){
+            o.forEach(function(date) {
+                __dp(date,Arg,back);
+            });
+        }else{
+            __dp(o,Arg,back);
+        }
+        return back;
+    }
+
 })(window)
