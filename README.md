@@ -2,7 +2,6 @@
 ##vRender.js是什么?
 * 基于原生javascript编写的一个前端渲染库，帮助前端人员轻松将JSON数据渲染至html<br>
 * 超轻量，压缩后仅5kb，使用纯字符串加正则表达式实现，避免了使用大量dom操作消耗较多性能的问题
-* 如含jquery或zepto的情况下，请将vRender.js文件放在其后引用。
 
 ##例子1
 
@@ -11,15 +10,52 @@
     {{value}}
     <br>
     {{made||无}}
+    <br>
+    {{made?value:"无"}}
 </div>
 <script>
-    $.vRender("div1",{value:"hello"})
+    vRender.render("div1",{value:"hello"})
+</script>
+```
+##字符串renderStr
+
+```code
+<div id="div1">
+
+</div>
+<script>
+
+document.getElementById("div1").innerHTML=vRender.renderStr("{{value}}",{value:"hello"});
+
+</script>
+```
+##$watch
+
+```code
+<div id="div1">
+{{value1}}
+<br>
+{{value2}}
+</div>
+<script>
+var model={value1:"hello",value2:"worder"}
+
+var vm=vRender.render("div1",model);
+
+model.value1="hi";
+
+vm.$watch("value2",function(val){
+	this.value1+=" girle";
+})
+
+model.value2="笑一个";
+
 </script>
 ```
 ###渲染结果
 ```code
-hello
-无
+hi girle
+笑一个
 ```
 ##建立虚拟view,id前边加“vDis"
 
@@ -31,7 +67,7 @@ hello
     {{made||无}}
 </div>
 <script>
-    $.vRender("div1",{value:"hello"})
+    vRender.render("div1",{value:"hello"})
 </script>
 ```
 ###渲染结果
@@ -53,7 +89,7 @@ hello
 <script>
     var model={value:"2015/12/24 11:22:56",num:1451360409000}
 
-    $.vRender("view", model);
+    vRender.render("view", model);
 </script>
 ```
 ###渲染结果
@@ -72,7 +108,7 @@ hello
 <script>
     var model=[{value:0},{value:1},{value:2}];
 
-    $.vRander("view", model);
+    vRender.render("view", model);
 </script>
 ```
 ###渲染结果
@@ -85,11 +121,11 @@ hello
 
 ```code
 <div id="view">
-    {{value(func1)}}
+    {{func1(value)}}
     <br>
-    {{text.value(func2)}}
+    {{func2(text.value)}}
     <br>
-    {{text.obj.p(obj_func3)}}        
+    {{func3(this)}}
 </div>
 <script>
     function func1(e){
@@ -106,7 +142,7 @@ hello
 
     var model={value:'hellow',text:{value:"word",obj:{p:"abcdeft"}}};
 
-    $.vRender("view", model);
+    vRender.render("view", model);
 </script>
 ```
 ###渲染结果
@@ -120,12 +156,12 @@ hellow:func3
 
 ```code
 <div id="view">
-	{{value(5)}}
+	{{value.5}}
     <br>
-    {{value(-5)}}
+    {{value.-5}}
 </div>
 <script>
-    $.vRender("view",{value:"1234567890"})
+    vRender.render("view",{value:"1234567890"})
 </script>
 ```
 ###渲染结果
@@ -151,7 +187,7 @@ hellow:func3
     
     var model={value:'hellow',text:{value:"word",obj:{p:"abcdeft"}}};
 
-    $.vRander("view", model);
+    vRender.render("view", model);
 
 </script>
 ```
@@ -180,7 +216,7 @@ abcdeft
 <script>
     var model={value:["A","B"]}
 
-    $.vRender("view", model);
+    vRender.render("view", model);
 </script>
 ```
 ###渲染结果
@@ -201,7 +237,7 @@ abcdeft
 <script>
    var model=[{name:"小明"},{name:"小白"}];
 
-    $.vRander("view", model);
+    vRender.render("view", model);
 </script>
 ```
 ###渲染结果
@@ -224,7 +260,7 @@ abcdeft
 <script>
     var model={name:"小红",friend:[{name:"小明"},{name:"小白"}]};
     
-    $.vRender("view", model);
+    vRender.render("view", model);
 </script>
 ```
 ###渲染结果
@@ -248,7 +284,7 @@ abcdeft
 <script>
    var model={user:[{name:"小明"},{name:"小白"}]};
 
-    $.vRander("view", model);
+    vRender.render("view", model);
 </script>
 ```
 ###渲染结果
@@ -320,7 +356,7 @@ var model=[{name:"小红",
         }
     ];
 
-	$.vRender("view", model);
+	vRender.render("view", model);
 ```
 ###渲染结果
 ```code
