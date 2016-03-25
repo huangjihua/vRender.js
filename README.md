@@ -17,6 +17,12 @@
     vRender.render("div1",{value:"hello"})
 </script>
 ```
+###渲染结果
+```code
+hello
+无
+无
+```
 ##字符串renderStr
 
 ```code
@@ -28,6 +34,10 @@
 document.getElementById("div1").innerHTML=vRender.renderStr("{{value}}",{value:"hello"});
 
 </script>
+```
+###渲染结果
+```code
+hello
 ```
 ##$watch
 
