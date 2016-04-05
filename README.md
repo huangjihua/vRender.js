@@ -74,7 +74,7 @@ hi girle
 <div id="vDisdiv1" style="display:none">
     {{value}}
     <br>
-    {{made||无}}
+    {{made||"无"}}
 </div>
 <script>
     vRender.render("div1",{value:"hello"})
@@ -189,7 +189,7 @@ hellow:func3
         
     {{text.obj.p}}  <br>
         
-    {{made||无}}
+    {{made||"无"}}
         
 </div>
     
