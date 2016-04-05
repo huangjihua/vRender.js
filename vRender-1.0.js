@@ -114,10 +114,11 @@
         var value="",nodata = "";
         if (columnValue.indexOf("||") > -1) {
             var columnsplit=columnValue.split("||");
-            nodata = columnsplit[1];
+            nodata = _judge(columnsplit[1],data);
             value = _judge(columnsplit[0],data);
             columnValue=columnsplit[0];
         }
+
 
         var arg1=columnValue.indexOf("?"),arg2=columnValue.indexOf(":");
         if(arg1>-1&&arg2>-1){
