@@ -3,7 +3,6 @@
     e.vRender || (e.vRender = {});
     Array.prototype.each=function(e){var l=this.length;for(var i=0;i<l;i++){e(this[i]);}}
     function _createpType(value, dataType, msg,columnValue) {
-
         if (dataType == "time") {
             if(_num.test(value)){
                 value=value*1;
@@ -64,6 +63,7 @@
                 "q+": Math.floor((time.getMonth() + 3) / 3),
                 "S": time.getMilliseconds()
             };
+
             if (/(y+)/.test(fmt))
                 fmt = fmt.replace(RegExp.$1, (time.getFullYear() + "").substr(4 - RegExp.$1.length));
             for (var k in o)
@@ -154,10 +154,9 @@
         _getType = "\(\\([^\\n("+_outType[1]+")("+_outType[0]+")]+\\)\){0,1}";
         _getTypeV = "\(\\([^\\n("+_outType[1]+")("+_outType[0]+")]+\\)\)";
 
-        _getStatus = "\({[^\\n]+}\){0,1}";
-        _getStatusV = "\({[^\\n{}]+[:,]+[^\\n{}]+}\){1}";
-
-        _reText = new RegExp(_getStatusV + "|\("+_outType[0]+"|"+_outType[1]+"\)|" + _getChild + "|" + _getList + "|" + _getType, "g");
+        _getStatus = "\(\{[^\\n{}]+\}\){0,1}";
+        _getStatusV = "\([^\\n{}]+[:,]+[^\\n{}]+\){1}";
+        _reText = new RegExp(_getStatus + "\("+_outType[0]+"|"+_outType[1]+"\)|" + _getChild + "|" + _getList + "|" + _getType, "g");
         _canRe = new RegExp(_outType[0]+"|"+_outType[1]+"|" + _getChild + "|\\([^\\n]+\\)}}", "g");
         _getAllChild = new RegExp(_outType[0] + _getText + _getChild + _getType + _getStatus +_outType[1], "g");
         _getAllList = new RegExp(_outType[0] + _getText + _getList + _getType + _getStatus + _outType[1], "g");
@@ -166,8 +165,9 @@
     }
     createRegex();
     function vCreateChild(data,_attr,str,level){
-        var msg=(data&&data[_attr])?data[_attr]:[];
 
+        var msg=(data&&data[_attr])?data[_attr]:[];
+        if(!Array.isArray(msg)){msg=[msg]};
         if (_attr.indexOf(".") > -1) {
             var columnAr = _attr.split('.');
             var l=columnAr.length;
@@ -178,7 +178,6 @@
                 msg[columnAri]&&(msg=msg[columnAri]);
             });
         }
-
         var childName = _outType[0] + _attr + "[list" + level + "]"+_outType[1], childEnd = _outType[0] + _attr + "[end" + level + "]"+_outType[1];
         var childStart = str.indexOf(childName);
         var childend = str.indexOf(childEnd);
@@ -186,10 +185,12 @@
         while (childStart > -1) {
             var regstr = str.substring(childStart + childName.length, str.indexOf(childEnd));
             var l = msg.length;
+
             var restultStr = "";
-            var _getNowChild = new RegExp(_outType[0] + _getText + _getType +"\\[child" + level + "\\]" +  _getStatus + _outType[1], "g");
+            var _getNowChild = new RegExp(_outType[0] + _getText + _getType +_getStatus +"\\[child" + level + "\\]" + _outType[1], "g");
             msg.each(function(msgi){
                 var tmp = regstr;
+
                 while(tmp.match(_getNowChild)){
                     var pstrs=tmp.match(_getNowChild);
                     pstrs.each(function(pstr){
@@ -205,6 +206,7 @@
                         else{
                             tmp = tmp.replace(pstr, _createpType(_createValue(vm,msgi, status),text,msgi,vm))
                         }
+
                     })
                 }
 
@@ -232,7 +234,6 @@
     function _BaseRanderAppend(data, _tempStr,dl) {
         dl =dl?dl:data.length;
         var str = "";
-
         data.each(function(dataj){
             var tempStr = _tempStr;
             tempStr=createByLevel(dataj,tempStr,"");
@@ -263,23 +264,7 @@
         return window["v" + element];
     }
 
-    function Render(element,date,_config){
-        config=_config;
-        config||(config={});
-        var strt = config["viewStr"] ? config["viewStr"] : _createThisEle(config["view"] ? config["view"] : element);
-        if(config["append"]&&config["append"]!=-1){
-            strt+=vRender.renderStr(strt,date,_config);
-        }
-        else if(config["append"]==-1){
-            strt=vRender.renderStr(strt,date,_config)+strt;
-        }
-        else{
-            strt=vRender.renderStr(strt,date,_config);
-        }
-        document.getElementById(element).innerHTML=strt;
-    }
-    var config;
-    e.vRender.renderStr=function(str,model,_config){
+    function RenderStr(str,model,_config){
         config=_config;
         if(model.constructor!=Array){model=[model]}
         config||(config={});
@@ -289,6 +274,24 @@
         }
         return _BaseRanderAppend(model,str);
     }
+    function Render(element,date,_config){
+        config=_config;
+        config||(config={});
+        var strt = config["viewStr"] ? config["viewStr"] : _createThisEle(config["view"] ? config["view"] : element);
+        if(config["append"]&&config["append"]!=-1){
+            strt+=RenderStr(strt,date,_config);
+        }
+        else if(config["append"]==-1){
+            strt=RenderStr(strt,date,_config)+strt;
+        }
+        else{
+            strt=RenderStr(strt,date,_config);
+        }
+        document.getElementById(element).innerHTML=strt;
+    }
+    var config;
+    e.vRender.renderStr=RenderStr;
+
     function __defineProperty(date,vm,arg,back){
         date.__ob__[vm]=date[vm];
         Object.defineProperty(date,vm,{
