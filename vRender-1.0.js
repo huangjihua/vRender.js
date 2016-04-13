@@ -114,7 +114,7 @@
         var value="",nodata = "";
         if (columnValue.indexOf("||") > -1) {
             var columnsplit=columnValue.split("||");
-            nodata = _judge(columnsplit[1],data);
+            nodata =_fnum.test(columnsplit[1])?columnsplit[1]*1:_judge(columnsplit[1],data);
             value = _judge(columnsplit[0],data);
             columnValue=columnsplit[0];
         }
@@ -146,7 +146,7 @@
     var _outType=["{{","}}"];
     var _strReg=new RegExp("^[\'\"]{1}[^\r]+[\'\"]{1}$");
     var _strRegV=new RegExp("^[\'\"]{1}|[\'\"]{1}$","g");
-    var _getText,_getChild,_getList,_getType,_getTypeV,_getStatus,_getStatusV,_reText,_canRe,_getAllChild,_getAllList,_getAll,_anNum2,_num;
+    var _getText,_getChild,_getList,_getType,_getTypeV,_getStatus,_getStatusV,_reText,_canRe,_getAllChild,_getAllList,_getAll,_anNum2,_num,_fnum;
     function createRegex(){
         _getText = "[^\\n("+_outType[1]+")("+_outType[0]+")]+";
         _getChild = "\\[child[0-9]{0,1}\\]";
@@ -161,7 +161,7 @@
         _getAllChild = new RegExp(_outType[0] + _getText + _getChild + _getType + _getStatus +_outType[1], "g");
         _getAllList = new RegExp(_outType[0] + _getText + _getList + _getType + _getStatus + _outType[1], "g");
         _getAll = new RegExp(_outType[0] + _getText + _getType + _getStatus + _outType[1]+"", "g");
-        _anNum2 = new RegExp("[^\\(\\)]+"), _num = new RegExp("^-{0,1}[0-9]+$");
+        _anNum2 = new RegExp("[^\\(\\)]+"), _num = new RegExp("^-{0,1}[0-9]+$"),_fnum=new RegExp("^[0-9]{0,20}[.]{0,1}[0-9]{0,20}$");
     }
     createRegex();
     function vCreateChild(data,_attr,str,level){
