@@ -277,17 +277,17 @@
     function Render(element,date,_config){
         config=_config;
         config||(config={});
+        var els=document.getElementById(element);
         var strt = config["viewStr"] ? config["viewStr"] : _createThisEle(config["view"] ? config["view"] : element);
         if(config["append"]&&config["append"]!=-1){
-            strt+=RenderStr(strt,date,_config);
+            els.innerHTML+=RenderStr(strt,date,_config);
         }
         else if(config["append"]==-1){
-            strt=RenderStr(strt,date,_config)+strt;
+            els.innerHTML=RenderStr(strt,date,_config)+els.innerHTML;
         }
         else{
-            strt=RenderStr(strt,date,_config);
+            els.innerHTML=RenderStr(strt,date,_config);
         }
-        document.getElementById(element).innerHTML=strt;
     }
     var config;
     e.vRender.renderStr=RenderStr;
