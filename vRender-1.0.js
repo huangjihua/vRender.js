@@ -324,6 +324,8 @@
         })
     }
     e.vRender.render=function (el,o,config){
+        if(o){
+            if(config&&config["$watch"]===true){
         var Arg=arguments;
         var back={__listen__:{},$watch:function(a,callback){
             if(typeof (a)=="string"){
@@ -331,11 +333,13 @@
             }
         }};
         function __dp(date,arg,back){
+            if(typeof(date)=="object"){
             date.__ob__={};
             if(Object.observe){
                 __observe(date,arg,back);
             }else{
                 for(var vm in date){(vm!="__ob__"&&vm!="__listen__")&&__defineProperty(date,vm,arg,back);}
+            }
             }
         }
         Render(el, o,config);
@@ -344,9 +348,16 @@
                 __dp(date,Arg,back);
             });
         }else{
+            for(var a in o){
+                __dp(o[a],Arg,back);
+            }
             __dp(o,Arg,back);
         }
         return back;
+        }else{
+                Render(el, o,config);
+            }
+        }
     }
 
 })(window)
