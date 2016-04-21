@@ -118,14 +118,15 @@
             value = _judge(columnsplit[0],data);
             columnValue=columnsplit[0];
         }
-
-
-        var arg1=columnValue.indexOf("?"),arg2=columnValue.indexOf(":");
-        if(arg1>-1&&arg2>-1){
+        var arg1=columnValue.indexOf("?");
+        if(arg1>-1){
+            var argV=columnValue.substring(arg1+1,columnValue.length);
+            var _left=argV.match(/^'[^\n\\]+':|^"[^\n\\]+":|^[^\n\\]+:/)[0];
+            var _right=argV.match(/:[^\n\\'"]+$|:'[^\n\\]+$|:"[^\n\\]+$/)[0];
             if(_judge(columnValue.substring(0,arg1),data)){
-                value=_judge(columnValue.substring(arg1+1,arg2),data);
+                value=_judge(_left.substring(0,_left.length-1),data);
             }else{
-                value=_judge(columnValue.substring(arg2+1,columnValue.length),data);
+                value=_judge(_right.substring(1,_right.length),data);
             }
         }else{
             value=_judge(columnValue,data);
@@ -146,7 +147,7 @@
     var _outType=["{{","}}"];
     var _strReg=new RegExp("^[\'\"]{1}[^\r]+[\'\"]{1}$");
     var _strRegV=new RegExp("^[\'\"]{1}|[\'\"]{1}$","g");
-    var _getText,_getChild,_getList,_getType,_getTypeV,_getStatus,_getStatusV,_reText,_canRe,_getAllChild,_getAllList,_getAll,_anNum2,_num,_fnum;
+    var _getText,_getChild,_getList,_getType,_getTypeV,_getStatus,_getStatusV,_reText,_canRe,_getAllChild,_getAllList,_getAll,_anNum2,_num,_fnum,_toReg;
     function createRegex(){
         _getText = "[^\\n("+_outType[1]+")("+_outType[0]+")]+";
         _getChild = "\\[child[0-9]{0,1}\\]";
@@ -162,6 +163,7 @@
         _getAllList = new RegExp(_outType[0] + _getText + _getList + _getType + _getStatus + _outType[1], "g");
         _getAll = new RegExp(_outType[0] + _getText + _getType + _getStatus + _outType[1]+"", "g");
         _anNum2 = new RegExp("[^\\(\\)]+"), _num = new RegExp("^-{0,1}[0-9]+$"),_fnum=new RegExp("^[0-9]{0,20}[.]{0,1}[0-9]{0,20}$");
+        _toReg=new RegExp("(\\(|\\)|\\[|\\]|\\||\\?)","g");
     }
     createRegex();
     function vCreateChild(data,_attr,str,level){
@@ -190,24 +192,20 @@
             var _getNowChild = new RegExp(_outType[0] + _getText + _getType +_getStatus +"\\[child" + level + "\\]" + _outType[1], "g");
             msg.each(function(msgi){
                 var tmp = regstr;
-
-                while(tmp.match(_getNowChild)){
-                    var pstrs=tmp.match(_getNowChild);
-                    pstrs.each(function(pstr){
-                        var text = pstr.replace(_reText, "");
-                        var vm = pstr.match(_getTypeV);
+                var pstr;
+                while(pstr=tmp.match(_getNowChild)){
+                        var text = pstr[0].replace(_reText, "");
+                        var vm = pstr[0].match(_getTypeV);
                         if(vm){vm=vm[0].replace(/^\(|\)$/g,"")}else{
                             vm=text;text="";
                         }
-                        var status = pstr.match(_getStatusV);
+                        var status = pstr[0].match(_getStatusV);
                         if (msgi.constructor !=Object){
-                            tmp = tmp.replace(pstr,msgi, text, msgi)
+                            tmp = tmp.replace(new RegExp(pstr[0].replace(_toReg,"\\$1"),"g"),msgi, text, msgi)
                         }
                         else{
-                            tmp = tmp.replace(pstr, _createpType(_createValue(vm,msgi, status),text,msgi,vm))
+                            tmp = tmp.replace(new RegExp(pstr[0].replace(_toReg,"\\$1"),"g"), _createpType(_createValue(vm,msgi, status),text,msgi,vm))
                         }
-
-                    })
                 }
 
                 tmp=createByLevel(msgi,tmp,level?level*1+1:level+2);
@@ -243,16 +241,14 @@
     }
 
     function _angular(str, msg) {
-        while(str.match(_getAll)){
-            var pstrs=str.match(_getAll);
-            pstrs.each(function(pstr){
-                var text = pstr.replace(_reText, "");
-                var vm=pstr.match(_getTypeV);
+        var pstr;
+        while(pstr=str.match(_getAll)){
+                var text = pstr[0].replace(_reText, "");
+                var vm=pstr[0].match(_getTypeV);
                 if(vm){vm=vm[0].replace(/^\(|\)$/g,"")}else{
                     vm=text;text="";
                 }
-                str = str.replace(pstr, _createpType(_createValue(vm, msg, pstr.match(_getStatusV)),text, msg,vm));
-            })
+                str = str.replace(new RegExp(pstr[0].replace(_toReg,"\\$1"),"g"), _createpType(_createValue(vm, msg, pstr[0].match(_getStatusV)),text, msg,vm));
         }
         return str;
     }
