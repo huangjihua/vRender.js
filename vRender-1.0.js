@@ -27,23 +27,23 @@
         }
         else {
             if (dataType) {
-                    var _tbol=true;
-                    switch ("function") {
-                        case typeof(config[dataType]):
-                            value = config[dataType](value);
-                            _tbol=false;
-                            break;
-                        case typeof(window[dataType]):
-                            value = window[dataType](value);
-                            _tbol=false;
-                            break;
-                    }
-                    if (_tbol&&/(y+)/.test(dataType)){
-                        value = format(dataType, value);
-                    }else{
-
-                    }
+                var _tbol=true;
+                switch ("function") {
+                    case typeof(config[dataType]):
+                        value = config[dataType](value);
+                        _tbol=false;
+                        break;
+                    case typeof(window[dataType]):
+                        value = window[dataType](value);
+                        _tbol=false;
+                        break;
                 }
+                if (_tbol&&/([yMdhms]+)/.test(dataType)){
+                    value = format(dataType, value);
+                }else{
+
+                }
+            }
         }
         return value;
     }
@@ -79,32 +79,32 @@
     function _judge(columnValue, data){
         var value;
         if(columnValue=="this"){
-        value=data;
+            value=data;
         }else{
-        if(_strReg.test(columnValue)){
-            value=columnValue.replace(_strRegV,"");
-        }else{
-            if (columnValue.indexOf(".") > -1) {
-                var columnAr = columnValue.split('.');
-                value=data;
-
-                columnAr.each(function(columnAri){
-                    if(typeof (value)=="string"&&_num.test(columnAri)){
-                        columnAri=columnAri*1;
-                        if (columnAri > 0&&value.length>columnAri) {
-                            value = value.substring(0, columnAri) + "...";
-                        }
-                        else if(columnAri<0&&value.length>-1*columnAri){
-                            value = "*" + value.substring(-1 * columnAri, value.length);
-                        }
-                    }else{
-                        value[columnAri]!=undefined&&(value=value[columnAri]);
-                    }
-                });
+            if(_strReg.test(columnValue)){
+                value=columnValue.replace(_strRegV,"");
             }else{
-                value=data[columnValue];
+                if (columnValue.indexOf(".") > -1) {
+                    var columnAr = columnValue.split('.');
+                    value=data;
+
+                    columnAr.each(function(columnAri){
+                        if(typeof (value)=="string"&&_num.test(columnAri)){
+                            columnAri=columnAri*1;
+                            if (columnAri > 0&&value.length>columnAri) {
+                                value = value.substring(0, columnAri) + "...";
+                            }
+                            else if(columnAri<0&&value.length>-1*columnAri){
+                                value = "*" + value.substring(-1 * columnAri, value.length);
+                            }
+                        }else{
+                            value[columnAri]!=undefined&&(value=value[columnAri]);
+                        }
+                    });
+                }else{
+                    value=data[columnValue];
+                }
             }
-        }
         }
         return value;
     }
@@ -150,8 +150,8 @@
     var _getText,_getChild,_getList,_getType,_getTypeV,_getStatus,_getStatusV,_reText,_canRe,_getAllChild,_getAllList,_getAll,_anNum2,_num,_fnum,_toReg;
     function createRegex(){
         _getText = "[^\\n("+_outType[1]+")("+_outType[0]+")]+";
-        _getChild = "\\[child[0-9]{0,1}\\]";
-        _getList = "\\[list[0-9]{0,1}\\]";
+        _getChild = "\\[child\\d{0,1}\\]";
+        _getList = "\\[list\\d{0,1}\\]";
         _getType = "\(\\([^\\n("+_outType[1]+")("+_outType[0]+")]+\\)\){0,1}";
         _getTypeV = "\(\\([^\\n("+_outType[1]+")("+_outType[0]+")]+\\)\)";
 
@@ -162,7 +162,7 @@
         _getAllChild = new RegExp(_outType[0] + _getText + _getChild + _getType + _getStatus +_outType[1], "g");
         _getAllList = new RegExp(_outType[0] + _getText + _getList + _getType + _getStatus + _outType[1], "g");
         _getAll = new RegExp(_outType[0] + _getText + _getType + _getStatus + _outType[1]+"", "g");
-        _anNum2 = new RegExp("[^\\(\\)]+"), _num = new RegExp("^-{0,1}[0-9]+$"),_fnum=new RegExp("^[0-9]{0,20}[.]{0,1}[0-9]{0,20}$");
+        _anNum2 = new RegExp("[^\\(\\)]+"), _num = new RegExp("^-{0,1}\\d+$"),_fnum=new RegExp("^\\d{0,20}[.]{0,1}\\d{0,20}$");
         _toReg=new RegExp("(\\(|\\)|\\[|\\]|\\||\\?)","g");
     }
     createRegex();
@@ -194,18 +194,18 @@
                 var tmp = regstr;
                 var pstr;
                 while(pstr=tmp.match(_getNowChild)){
-                        var text = pstr[0].replace(_reText, "");
-                        var vm = pstr[0].match(_getTypeV);
-                        if(vm){vm=vm[0].replace(/^\(|\)$/g,"")}else{
-                            vm=text;text="";
-                        }
-                        var status = pstr[0].match(_getStatusV);
-                        if (msgi.constructor !=Object){
-                            tmp = tmp.replace(new RegExp(pstr[0].replace(_toReg,"\\$1"),"g"),msgi, text, msgi)
-                        }
-                        else{
-                            tmp = tmp.replace(new RegExp(pstr[0].replace(_toReg,"\\$1"),"g"), _createpType(_createValue(vm,msgi, status),text,msgi,vm))
-                        }
+                    var text = pstr[0].replace(_reText, "");
+                    var vm = pstr[0].match(_getTypeV);
+                    if(vm){vm=vm[0].replace(/^\(|\)$/g,"")}else{
+                        vm=text;text="";
+                    }
+                    var status = pstr[0].match(_getStatusV);
+                    if (msgi.constructor !=Object){
+                        tmp = tmp.replace(new RegExp(pstr[0].replace(_toReg,"\\$1"),"g"),msgi, text, msgi)
+                    }
+                    else{
+                        tmp = tmp.replace(new RegExp(pstr[0].replace(_toReg,"\\$1"),"g"), _createpType(_createValue(vm,msgi, status),text,msgi,vm))
+                    }
                 }
 
                 tmp=createByLevel(msgi,tmp,level?level*1+1:level+2);
@@ -243,12 +243,12 @@
     function _angular(str, msg) {
         var pstr;
         while(pstr=str.match(_getAll)){
-                var text = pstr[0].replace(_reText, "");
-                var vm=pstr[0].match(_getTypeV);
-                if(vm){vm=vm[0].replace(/^\(|\)$/g,"")}else{
-                    vm=text;text="";
-                }
-                str = str.replace(new RegExp(pstr[0].replace(_toReg,"\\$1"),"g"), _createpType(_createValue(vm, msg, pstr[0].match(_getStatusV)),text, msg,vm));
+            var text = pstr[0].replace(_reText, "");
+            var vm=pstr[0].match(_getTypeV);
+            if(vm){vm=vm[0].replace(/^\(|\)$/g,"")}else{
+                vm=text;text="";
+            }
+            str = str.replace(new RegExp(pstr[0].replace(_toReg,"\\$1"),"g"), _createpType(_createValue(vm, msg, pstr[0].match(_getStatusV)),text, msg,vm));
         }
         return str;
     }
@@ -275,6 +275,7 @@
         config||(config={});
         var els=document.getElementById(element);
         var strt = config["viewStr"] ? config["viewStr"] : _createThisEle(config["view"] ? config["view"] : element);
+
         if(config["append"]&&config["append"]!=-1){
             els.innerHTML+=RenderStr(strt,date,_config);
         }
@@ -284,6 +285,7 @@
         else{
             els.innerHTML=RenderStr(strt,date,_config);
         }
+
     }
     var config;
     e.vRender.renderStr=RenderStr;
@@ -291,19 +293,19 @@
     function __defineProperty(date,vm,arg,back){
         date.__ob__[vm]=date[vm];
         Object.defineProperty(date,vm,{
-             set:function(e){
-                 this.__ob__[vm]=e;
-                 var obj={};
-                 back.__listen__[vm]&&back.__listen__[vm].apply(obj,arguments);
-                 for(var b in obj){
-                     this.__ob__[b]=obj[b];
-                 }
-                 Render.apply(this,arg);
-             },
-             get:function(){
-                 return this.__ob__[vm];
-             }
-         })
+            set:function(e){
+                this.__ob__[vm]=e;
+                var obj={};
+                back.__listen__[vm]&&back.__listen__[vm].apply(obj,arguments);
+                for(var b in obj){
+                    this.__ob__[b]=obj[b];
+                }
+                Render.apply(this,arg);
+            },
+            get:function(){
+                return this.__ob__[vm];
+            }
+        })
     }
     function __observe(date,arg,back){
         Object.observe(date,function(e){
@@ -322,38 +324,39 @@
     e.vRender.render=function (el,o,config){
         if(o){
             if(config&&config["$watch"]===true){
-        var Arg=arguments;
-        var back={__listen__:{},$watch:function(a,callback){
-            if(typeof (a)=="string"){
-                this.__listen__[a]=callback;
-            }
-        }};
-        function __dp(date,arg,back){
-            if(typeof(date)=="object"){
-            date.__ob__={};
-            if(Object.observe){
-                __observe(date,arg,back);
+                var Arg=arguments;
+                var back={__listen__:{},$watch:function(a,callback){
+                    if(typeof (a)=="string"){
+                        this.__listen__[a]=callback;
+                    }
+                }};
+                function __dp(date,arg,back){
+                    if(typeof(date)=="object"){
+                        date.__ob__={};
+                        if(Object.observe){
+                            __observe(date,arg,back);
+                        }else{
+                            for(var vm in date){(vm!="__ob__"&&vm!="__listen__")&&__defineProperty(date,vm,arg,back);}
+                        }
+                    }
+                }
+                Render(el, o,config);
+                if(Array.isArray(o)){
+                    o.forEach(function(date) {
+                        __dp(date,Arg,back);
+                    });
+                }else{
+                    for(var a in o){
+                        __dp(o[a],Arg,back);
+                    }
+                    __dp(o,Arg,back);
+                }
+                return back;
             }else{
-                for(var vm in date){(vm!="__ob__"&&vm!="__listen__")&&__defineProperty(date,vm,arg,back);}
-            }
-            }
-        }
-        Render(el, o,config);
-        if(Array.isArray(o)){
-            o.forEach(function(date) {
-                __dp(date,Arg,back);
-            });
-        }else{
-            for(var a in o){
-                __dp(o[a],Arg,back);
-            }
-            __dp(o,Arg,back);
-        }
-        return back;
-        }else{
                 Render(el, o,config);
             }
         }
+
     }
 
 })(window)
