@@ -98,7 +98,7 @@
                                 value = "*" + value.substring(-1 * columnAri, value.length);
                             }
                         }else{
-                            value[columnAri]!=undefined&&(value=value[columnAri]);
+                            value[columnAri]!=undefined?(value=value[columnAri]):value="";
                         }
                     });
                 }else{
