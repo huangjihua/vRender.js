@@ -30,6 +30,7 @@
         }
         else {
             if (dataType) {
+
                 var _tbol=true;
                 switch ("function") {
                     case typeof(config[dataType]):
@@ -41,6 +42,7 @@
                         _tbol=false;
                         break;
                 }
+
                 if (_tbol&&/([yMdhms]+)/.test(dataType)){
                     value = format(dataType, value);
                 }else{
@@ -166,7 +168,7 @@
         _getAllChild = new RegExp(_outType[0] + _getText + _getChild + _getType + _getStatus +_outType[1], "g");
         _getAllList = new RegExp(_outType[0] + _getText + _getList + _getType + _getStatus + _outType[1], "g");
         _getAll = new RegExp("{{[^]+}}", "g");
-        ifkuohao=new RegExp("^[^]+\\([^]+\\)$");
+        ifkuohao=new RegExp("^"+_outType[0]+"[^]+\\([^]+\\)"+_outType[1]+"$");
         _anNum2 = new RegExp("[^\\(\\)]+"), _num = new RegExp("^-{0,1}\\d+$"),_fnum=new RegExp("^\\d{0,20}[.]{0,1}\\d{0,20}$");
         _toReg=new RegExp("(\\(|\\)|\\[|\\]|\\||\\?)","g");
     }
@@ -212,6 +214,7 @@
         while(pstr=tmp.match(_getNowChild)){
             var text = pstr[0].replace(/^{{|}}$/g, "").replace(/\[child\]$/g,"");
             var vm=ifkuohao.test(pstr[0])?pstr[0].match(_getTypeV):"";
+
             if(vm){vm=vm[0].replace(/^\(|\)$/g,"")}else{
                 vm=text;text="";
             }
@@ -254,6 +257,7 @@
             if(vm){vm=vm[0].replace(/^\(|\)$/g,"")}else{
                 vm=text;text="";
             }
+
             str = str.replace(new RegExp(pstr[0].replace(_toReg,"\\$1"),"g"), _createpType(_createValue(vm, msg, pstr[0].match(_getStatusV)),text, msg,vm));
         }
         return str;
