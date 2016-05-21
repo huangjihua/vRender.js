@@ -25,6 +25,9 @@
         else if (dataType == "litImage") {
             value = toImgUrl(value, 1);
         }
+        else if (dataType == "smallImage") {
+            value = toImgUrl(value, 2);
+        }
         else {
             if (dataType) {
                 var _tbol=true;
@@ -87,7 +90,6 @@
                 if (columnValue.indexOf(".") > -1) {
                     var columnAr = columnValue.split('.');
                     value=data;
-
                     columnAr.each(function(columnAri){
                         if(typeof (value)=="string"&&_num.test(columnAri)){
                             columnAri=columnAri*1;
@@ -109,8 +111,7 @@
         return value;
     }
 
-    function _createValue(columnValue, data, status) {
-
+    function _createValue(columnValue, data, status,msgi,_getNowChild,level) {
         var value="",nodata = "";
         if (columnValue.indexOf("||") > -1) {
             var columnsplit=columnValue.split("||");
@@ -121,16 +122,19 @@
         var arg1=columnValue.indexOf("?");
         if(arg1>-1){
             var argV=columnValue.substring(arg1+1,columnValue.length);
-            var _left=argV.match(/^'[^\n\\]+':|^"[^\n\\]+":|^[^\n\\]+:/)[0];
-            var _right=argV.match(/:[^\n\\'"]+$|:'[^\n\\]+$|:"[^\n\\]+$/)[0];
+            var _left=argV.match(/^'[^]+':|^"[^]+":|^[^]+:/)[0];
+            var _right=argV.match(/:[^'"]+$|:'[^]+$|:"[^]+$/)[0];
+
             if(_judge(columnValue.substring(0,arg1),data)){
                 value=_judge(_left.substring(0,_left.length-1),data);
             }else{
+                var tm=childRender(_right.substring(1,_right.length),msgi,_getNowChild,level);
                 value=_judge(_right.substring(1,_right.length),data);
             }
         }else{
             value=_judge(columnValue,data);
         }
+
         if (status) {
             status = status[0];
             var p = status.replace(_rdkh, "").split(",");
@@ -148,26 +152,26 @@
     var _strReg=new RegExp("^[\'\"]{1}[^\r]+[\'\"]{1}$");
     var _strRegV=new RegExp("^[\'\"]{1}|[\'\"]{1}$","g");
     var _getText,_getChild,_getList,_getType,_getTypeV,_getStatus,_getStatusV,_reText,_canRe,_getAllChild,_getAllList,_getAll,_anNum2,_num,_fnum,_toReg;
+    var ifkuohao;
     function createRegex(){
         _getText = "[^\\n("+_outType[1]+")("+_outType[0]+")]+";
         _getChild = "\\[child\\d{0,1}\\]";
         _getList = "\\[list\\d{0,1}\\]";
-        _getType = "\(\\([^\\n("+_outType[1]+")("+_outType[0]+")]+\\)\){0,1}";
+        _getType = "\\([^]+\\)$";
         _getTypeV = "\(\\([^\\n("+_outType[1]+")("+_outType[0]+")]+\\)\)";
-
         _getStatus = "\(\{[^\\n{}]+\}\){0,1}";
         _getStatusV = "\([^\\n{}]+[:,]+[^\\n{}]+\){1}";
-        _reText = new RegExp(_getStatus + "\("+_outType[0]+"|"+_outType[1]+"\)|" + _getChild + "|" + _getList + "|" + _getType, "g");
+        _reText = new RegExp("^"+_outType[0]+"|"+_outType[1]+"$|"+_getChild+"$|" + _getList + "|" + _getType, "g");
         _canRe = new RegExp(_outType[0]+"|"+_outType[1]+"|" + _getChild + "|\\([^\\n]+\\)}}", "g");
         _getAllChild = new RegExp(_outType[0] + _getText + _getChild + _getType + _getStatus +_outType[1], "g");
         _getAllList = new RegExp(_outType[0] + _getText + _getList + _getType + _getStatus + _outType[1], "g");
-        _getAll = new RegExp(_outType[0] + _getText + _getType + _getStatus + _outType[1]+"", "g");
+        _getAll = new RegExp("{{[^]+}}", "g");
+        ifkuohao=new RegExp("^[^]+\\([^]+\\)$");
         _anNum2 = new RegExp("[^\\(\\)]+"), _num = new RegExp("^-{0,1}\\d+$"),_fnum=new RegExp("^\\d{0,20}[.]{0,1}\\d{0,20}$");
         _toReg=new RegExp("(\\(|\\)|\\[|\\]|\\||\\?)","g");
     }
     createRegex();
     function vCreateChild(data,_attr,str,level){
-
         var msg=(data&&data[_attr])?data[_attr]:[];
         if(!Array.isArray(msg)){msg=[msg]};
         if (_attr.indexOf(".") > -1) {
@@ -186,28 +190,12 @@
 
         while (childStart > -1) {
             var regstr = str.substring(childStart + childName.length, str.indexOf(childEnd));
+
             var l = msg.length;
-
             var restultStr = "";
-            var _getNowChild = new RegExp(_outType[0] + _getText + _getType +_getStatus +"\\[child" + level + "\\]" + _outType[1], "g");
+            var _getNowChild = new RegExp(_outType[0] + "[^]+\\[child" + level + "\\]" + _outType[1], "g");
             msg.each(function(msgi){
-                var tmp = regstr;
-                var pstr;
-                while(pstr=tmp.match(_getNowChild)){
-                    var text = pstr[0].replace(_reText, "");
-                    var vm = pstr[0].match(_getTypeV);
-                    if(vm){vm=vm[0].replace(/^\(|\)$/g,"")}else{
-                        vm=text;text="";
-                    }
-                    var status = pstr[0].match(_getStatusV);
-                    if (msgi.constructor !=Object){
-                        tmp = tmp.replace(new RegExp(pstr[0].replace(_toReg,"\\$1"),"g"),msgi, text, msgi)
-                    }
-                    else{
-                        tmp = tmp.replace(new RegExp(pstr[0].replace(_toReg,"\\$1"),"g"), _createpType(_createValue(vm,msgi, status),text,msgi,vm))
-                    }
-                }
-
+                var tmp=childRender(regstr,msgi,_getNowChild,level);
                 tmp=createByLevel(msgi,tmp,level?level*1+1:level+2);
                 restultStr += tmp;
             });
@@ -218,9 +206,27 @@
         }
         return str;
     }
-
+    function childRender(regstr,msgi,_getNowChild,level){
+        var tmp = regstr;
+        var pstr;
+        while(pstr=tmp.match(_getNowChild)){
+            var text = pstr[0].replace(/^{{|}}$/g, "").replace(/\[child\]$/g,"");
+            var vm=ifkuohao.test(pstr[0])?pstr[0].match(_getTypeV):"";
+            if(vm){vm=vm[0].replace(/^\(|\)$/g,"")}else{
+                vm=text;text="";
+            }
+            var status = pstr[0].match(_getStatusV);
+            if (msgi.constructor !=Object){
+                tmp = tmp.replace(new RegExp(pstr[0].replace(_toReg,"\\$1"),"g"),msgi);
+            }
+            else{
+                tmp = tmp.replace(new RegExp(pstr[0].replace(_toReg,"\\$1"),"g"), _createpType(_createValue(vm,msgi, status,msgi,_getNowChild,level),text,msgi,vm));
+            }
+        }
+        return tmp;
+    }
     function createByLevel(data,tempStr,level){
-        var _getNowList = new RegExp(_outType[0] + _getText + "\\[list" + level + "\\]" + _getType + _getStatus + _outType[1], "g");
+        var _getNowList = new RegExp(_outType[0] +"[^]+\\[list" + level + "\\]" + _outType[1], "g");
         var lkey = tempStr.match(_getNowList);
         if (lkey) {
             var _attr = lkey[0].replace(_reText, "");
@@ -237,14 +243,14 @@
             tempStr=createByLevel(dataj,tempStr,"");
             str +=_angular(tempStr,dataj);
         });
+
         return str;
     }
-
     function _angular(str, msg) {
         var pstr;
         while(pstr=str.match(_getAll)){
             var text = pstr[0].replace(_reText, "");
-            var vm=pstr[0].match(_getTypeV);
+            var vm=ifkuohao.test(pstr[0])?pstr[0].match(_getTypeV):"";
             if(vm){vm=vm[0].replace(/^\(|\)$/g,"")}else{
                 vm=text;text="";
             }
