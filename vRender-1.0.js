@@ -307,7 +307,19 @@
             set: function(e) {
                 this.__ob__[vm] = e;
                 var obj = {};
-                back.__listen__[vmPath] && back.__listen__[vmPath].apply(obj, arguments);
+                var __funkey=vmPath.replace(/.\d+./,".").replace(/.\d+$/,"");
+                if(back.__listen__[vmPath]&&back.__listen__[__funkey]){
+                    if(back.__listen__.__listen__key[vmPath]<=back.__listen__.__listen__key[__funkey]){
+                        back.__listen__[vmPath].apply(obj, arguments);
+                        back.__listen__[__funkey].apply(obj,arguments);
+                    }else{
+                        back.__listen__[__funkey].apply(obj,arguments);
+                        back.__listen__[vmPath].apply(obj, arguments);
+                    }
+                }else{
+                    back.__listen__[vmPath] && back.__listen__[vmPath].apply(obj, arguments);
+                    back.__listen__[__funkey] && back.__listen__[__funkey].apply(obj, arguments);
+                }
                 for (var b in obj) {
                     this.__ob__[b] = obj[b]
                 }
@@ -320,23 +332,15 @@
             }
         })
     }
-    function array_defineProperty(o,Arg,back,dateo,vmPath){
-        o.forEach(function(date) {
-            __dp(date, Arg, back,dateo,vmPath)
-        })
-    }
+
     function __dp(date, arg, back,dateo,vmPath) {
         if (typeof(date) == "object") {
             date.__ob__ = {};
                 for (var vm in date) {
                     if(vm != "__ob__" && vm != "__listen__"){
                         var _vmPath=vmPath?vmPath+"."+vm:vm;
-                        if(Array.isArray(date[vm])){
-                            array_defineProperty(date[vm],arg,back,dateo,_vmPath);
-                        }else{
                             __defineProperty(date, vm, arg, back,dateo,_vmPath);
                             __dp(date[vm],arg,back,dateo,_vmPath);
-                        }
                     }
                 }
         }
@@ -346,9 +350,11 @@
             if (config && config["$watch"] === true) {
                 var Arg = arguments;
                 var back = {
-                    __listen__: {},
+                    __listen__: {__listen__time:0,__listen__key:{}},
                     $watch: function(a, callback) {
                         if (typeof(a) == "string") {
+                            this.__listen__.__listen__key[a]=this.__listen__.__listen__time;
+                            this.__listen__.__listen__time++;
                             this.__listen__[a] = callback
                         }
                     }
