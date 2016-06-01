@@ -234,8 +234,12 @@
         var _getNowList = new RegExp(_outType[0] + _getText + "\\[list" + level + "\\]" + _getType + _getStatus + _outType[1], "g");
         var lkey = tempStr.match(_getNowList);
         if (lkey) {
-            var _attr = lkey[0].replace(_reText, "");
-            return vCreateChild(data, _attr, tempStr, level)
+            var _lkey=tempStr;
+            lkey.each(function(e){
+                var _attr = e.replace(_reText, "");
+                tempStr=vCreateChild(data, _attr, tempStr, level);
+            })
+            return tempStr;
         } else {
             return tempStr
         }
@@ -325,7 +329,7 @@
                 }
                 var that=this;
                 clearTimeout(window["_rendout"+arg[0]]);
-                window["_rendout"+arg[0]]=setTimeout(function(){Render.apply(that, arg);},1);
+                window["_rendout"+arg[0]]=setTimeout(function(){if(back.render){back.render();}else{Render.apply(that, arg);}},1);
             },
             get: function() {
                 return this.__ob__[vm]
@@ -357,7 +361,8 @@
                             this.__listen__.__listen__time++;
                             this.__listen__[a] = callback
                         }
-                    }
+                    },
+                    render:config.$render
                 };
                 Render(el, o, config);
                 if (Array.isArray(o)) {
