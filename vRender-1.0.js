@@ -148,7 +148,7 @@
             var l = p.length;
             for (var i = 0; i < l; i++) {
                 var _pNm = p[i].split(":");
-                if (_pNm[0] == value) {
+                if (_pNm[0] == value||(_pNm[0]===""&&value===undefined)) {
                     value = _pNm[1]
                 }
             }
@@ -216,7 +216,7 @@
                     }
                     var status = pstr[0].match(_getStatusV);
                     if (msgi.constructor != Object) {
-                        tmp = tmp.replace(new RegExp(pstr[0].replace(_toReg, "\\$1"), "g"), msgi, text, msgi)
+                        tmp = tmp.replace(new RegExp(pstr[0].replace(_toReg, "\\$1"), "g"), _createpType(msgi,text,msgi,vm));
                     } else {
                         tmp = tmp.replace(new RegExp(pstr[0].replace(_toReg, "\\$1"), "g"), _createpType(_createValue(vm, msgi, status), text, msgi, vm))
                     }
