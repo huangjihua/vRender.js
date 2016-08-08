@@ -6,86 +6,167 @@
 ##例子1
 
 ```code
-<div id="div1">
+<div id="view">
     {{value}}
-    <br>
-    {{made||无}}
-    <br>
-    {{made?value:"无"}}
 </div>
 <script>
-    vRender.render("div1",{value:"hello"})
-</script>
-```
-###渲染结果
-```code
-hello
-无
-无
-```
-##字符串renderStr
-
-```code
-<div id="div1">
-
-</div>
-<script>
-
-document.getElementById("div1").innerHTML=vRender.renderStr("{{value}}",{value:"hello"});
-
+    vRender.render("view",{value:"hello"})
+    //或者
+    //var view=document.getElmentById("view");
+    //vRender.render(view,{value:"hello"})
 </script>
 ```
 ###渲染结果
 ```code
 hello
 ```
-##$watch
+##例子2
 
 ```code
-<div id="div1">
-{{value1}}
-<br>
-{{value2}}
+<div id="view">
+    {{value||'无数据'}}
 </div>
 <script>
-var model={value1:"hello",value2:"worder"}
+    vRender.render("view",{value:""})
+</script>
+```
+###渲染结果
+```code
+无数据
+```
+##例子3
 
-var vm=vRender.render("div1",model);
+```code
+<div id="view">
+    {{value?'有数据':'无数据'}}
+</div>
+<script>
+    vRender.render("view",{value:""})
+</script>
+```
+###渲染结果
+```code
+无数据
+```
+##数据变化自动更新视图
+```code
+<div id="view">
+    {{value?'有数据':'无数据'}}
+</div>
+<script>
+    var model={value:""}
+    vRender.render("view",model);
+    model.value="1";
+</script>
+```
+###渲染结果
+```code
+有数据
+```
+##监听数据变化,$watch监听，$set修改
 
-model.value1="hi";
+```code
+<div id="view">
+{{value}}
+</div>
+<script>
+var model={value:""}
 
-vm.$watch("value2",function(val){
-	this.value1+=" girle";
+var vm=vRender.render("view",model);
+
+vm.$watch("value",function(val){//val是监听到的新的值
+	this.value+="妹子";
 })
 
-model.value2="笑一个";
+model.value="你好";
+//或者 vm.$set("value","妹子");
 
 </script>
 ```
 ###渲染结果
 ```code
-hi girle
-笑一个
+你好妹子
 ```
-##建立虚拟view,id前边加“vDis"
+##数据双向绑定v-model
 
 ```code
-<div id="div1"></div>
-<div id="vDisdiv1" style="display:none">
-    {{value}}
-    <br>
-    {{made||"无"}}
+<div id="view">
+值：{{value}}
+<input value="" v-model="value" >
 </div>
 <script>
-    vRender.render("div1",{value:"hello"})
+
+var model={value:""}
+
+var vm=vRender.render("view",model);
+
+</script>
+```
+##v-for数据列表循环
+```code
+<div id="view" v-for="user in friend">
+    朋友：{{user.name}}<br>
+<br>
+</div>
+<script>
+    var model={name:"小红",friend:[{name:"小明"},{name:"小白"}]};
+    
+    vRender.render("view", model);
 </script>
 ```
 ###渲染结果
 ```code
-hello
-无
+小明
+小白 
 ```
 
+##调用已经写好的function
+
+```code
+<div id="view">
+    {{func1(value)}}
+    <br>
+    {{func2(value)}}
+</div>
+<script>
+   var model={value:'ok'},
+   var config={
+       func1:function(e){
+          return e;
+          }
+    }
+    
+    //config里没有func2则调用全局
+    function func2(e){
+        return e+":func2";
+    }
+    vRender.render("view", model,config);
+    
+</script>
+```
+###渲染结果
+```code
+ok
+ok:func2
+```
+
+##字符串截取
+
+```code
+<div id="view">
+	{{value.5}}
+    <br>
+    {{value.-5}}
+</div>
+<script>
+    vRender.render("view",{value:"1234567890"})
+</script>
+```
+###渲染结果
+```code
+12345... 
+*67890   
+```
 ##时间
 
 ```code
@@ -109,6 +190,27 @@ hello
 2015-12-24
 ```
 
+##建立虚拟view,id前边加“vDis"
+
+```code
+<div id="div1"></div>
+<div id="vDisdiv1" style="display:none">
+    {{value}}
+    <br>
+    {{made||"无"}}
+</div>
+<script>
+    vRender.render("div1",{value:"hello"})
+</script>
+```
+###渲染结果
+```code
+hello
+无
+```
+
+
+
 ##状态
 
 ```code
@@ -127,272 +229,8 @@ hello
 已支付
 已退款
 ```
-##调用已经写好的function
 
-```code
-<div id="view">
-    {{func1(value)}}
-    <br>
-    {{func2(text.value)}}
-    <br>
-    {{func3(this)}}
-</div>
-<script>
-    function func1(e){
-        return e+":func1";
-    }
-    
-    function func2(e){
-        return e+":func2";
-    }
-    
-    function func3(e){
-        return e.value+":func3";
-    }
 
-    var model={value:'hellow',text:{value:"word",obj:{p:"abcdeft"}}};
-
-    vRender.render("view", model);
-</script>
-```
-###渲染结果
-```code
-hellow:func1 
-word:func2 
-hellow:func3
-```
-
-##字符串截取
-
-```code
-<div id="view">
-	{{value.5}}
-    <br>
-    {{value.-5}}
-</div>
-<script>
-    vRender.render("view",{value:"1234567890"})
-</script>
-```
-###渲染结果
-```code
-12345... 
-*67890   
-```
-
-##object
-
-```code
-<div id="view">		 
-    
-    {{text.value}}  <br>
-        
-    {{text.obj.p}}  <br>
-        
-    {{made||"无"}}
-        
-</div>
-    
-<script>
-    
-    var model={value:'hellow',text:{value:"word",obj:{p:"abcdeft"}}};
-
-    vRender.render("view", model);
-
-</script>
-```
-###渲染结果
-```code
-word 
-abcdeft 
-无 
-```
-
-##数组
-
-```code
-<div id="view">
-全部：{{value}}     <br>
-循环：
-	{{value[list]}}
-		{{value[child]}}
-	{{value[end]}}
-<br>
-读取第一个：
-	{{value.0}}     <br>
-读取第二个：	
-    {{value.1}}
-</div>
-<script>
-    var model={value:["A","B"]}
-
-    vRender.render("view", model);
-</script>
-```
-###渲染结果
-```code
-全部：A,B
-循环：AB
-读取第一个：A
-读取第二个：B
-```
-##object数组
-
-```code
-<div id="view">
-    {{name}}
-    <br>
-<br>
-</div>
-<script>
-   var model=[{name:"小明"},{name:"小白"}];
-
-    vRender.render("view", model);
-</script>
-```
-###渲染结果
-```code
-小明
-小白
-```
-
-##子级object数组
-
-```code
-<div id="view">
-    角色：{{name}}<br>
-    朋友：
-        {{friend[list]}}<!--循环渲染 开始标记-->
-            {{name[child]}}
-        {{friend[end]}}<!--循环渲染 结束标记-->
-<br>
-</div>
-<script>
-    var model={name:"小红",friend:[{name:"小明"},{name:"小白"}]};
-    
-    vRender.render("view", model);
-</script>
-```
-###渲染结果
-```code
-角色：小红
-朋友： 小明 小白 
-```
-##渲染至table，需要外边包一层div标签，然后要借助<!-- -->
-```code
-<div id="view">
-	<table>
-		<tr>
-		<!--{{user[list]}}-->
-			<td>{{name[child]}}  &nbsp;</td>
-		<!--{{user[end]}}-->
-		</tr>
-	</table>
-    <br>
-<br>
-</div>
-<script>
-   var model={user:[{name:"小明"},{name:"小白"}]};
-
-    vRender.render("view", model);
-</script>
-```
-###渲染结果
-```code
-小明 小白 
-```
-##更多级别的子级object数组
-
-```code
-<div id="view">
-    角色：{{name}}<br>
-    朋友：
-    <ul>
-        <li>
-            {{friend[list]}}<!--循环渲染 开始标记-->
-            朋友名字： {{name[child]}}<br>
-            读书：
-            <ul>
-                {{book[list2]}}
-                <li>
-                    {{name[child2]}}
-                </li>
-                {{book[end2]}}
-            </ul>
-        </li>
-        {{friend[end]}}<!--循环渲染 结束标记-->
-    </ul>
-    <br>
-</div>
-
-<script>
-
-var model=[{name:"小红",
-    friend:[
-        {
-            name:"小明",
-                book:[
-                    {name:'node.js'},
-                    {name:'c#'}
-                ]
-            },
-            {
-                name:"小白",
-                book:[
-                    {name:'java'},
-                    {name:'ruby'}
-                ]
-            }
-        ]
-    },
-        {
-            name:"小黑",
-            friend:[
-                {
-                    name:"黑小明",
-                    book:[
-                        {name:'黑node.js'},
-                        {name:'黑c#'}
-                    ]
-                },
-                {
-                    name:"黑小白",
-                    book:[
-                        {name:'黑java'},
-                        {name:'黑ruby'}
-                    ]
-                }
-            ]
-        }
-    ];
-
-	vRender.render("view", model);
-```
-###渲染结果
-```code
-角色：小红
-朋友：
-    朋友名字： 小明
-    读书：
-        node.js        
-        c#            
-    朋友名字： 小白
-    读书：
-        java            
-        ruby            
-
-角色：小黑
-朋友：
-    朋友名字： 黑小明
-    读书：
-        黑node.js            
-        黑c#
-    朋友名字： 黑小白
-    读书：
-        黑java
-        黑ruby            
-
-```
 
 
 ##有问题反馈
