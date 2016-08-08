@@ -50,16 +50,7 @@
                     value = _tm2.getFullYear() + "/" + (_tm2.getMonth() + 1) + "/" + _tm2.getDate()
                 }
             } else {
-                if (dataType == "image") {
-                    value = toImgUrl(value)
-                } else {
-                    if (dataType == "litImage") {
-                        value = toImgUrl(value, 1)
-                    } else {
-                        if (dataType == "smallImage") {
-                            value = toImgUrl(value, 2)
-                        } else {
-                            if (dataType) {
+             if (dataType) {
                                 var _tbol = true;
                                 switch ("function") {
                                     case typeof(this.config[dataType]):
@@ -75,9 +66,6 @@
                                     value = format(dataType, value)
                                 } else {}
                             }
-                        }
-                    }
-                }
             }
         }
         }
