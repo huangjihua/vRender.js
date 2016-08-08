@@ -216,7 +216,7 @@
             nodata = "";        
         this.dom=dom;
         this.defaultText=defaultText;
-        var arg1 = columnValue.indexOf("?");        
+        var arg1 = columnValue.indexOf("?");  
         if((/[-*+\/]+/).test(columnValue)){                     
             var _columnValue=columnValue.replace(/\s+/g,"");
             var _values;
@@ -237,10 +237,10 @@
         }
         else if (columnValue.indexOf("||") > -1) {
             var columnsplit = columnValue.split("||");
-            if(fnum.test(columnsplit[1])){
+            if((/^-?[\d]+$/).test(columnsplit[1])){
                 nodata=columnsplit[1] * 1;
             }else{
-                nodata=judge.call(this,columnsplit[1],upRegKeys,round);
+                nodata=_judge.call(this,columnsplit[1],upRegKeys,round);
             }
             value = _judge.call(this,columnsplit[0],upRegKeys,round);
             columnValue = columnsplit[0]
@@ -620,8 +620,21 @@
                         }
                     }
                 }
-                this.__ob__[vm] = e;
-                //�������鴦��
+                this.__ob__[vm] = e;              
+                //$watch
+                var obj = {};                
+                var __funkey=_vmPath.replace(/\.\d+./,".").replace(/\.\d+$/,"").replace(/^\./,"");                
+                var _index=_vmPath.split(".");
+                if(!(/^\d+$/).test(_index[_index.length-1])){
+                    _index.pop();
+                }
+                             
+                that.back.__listen__[_vmPath] && that.back.__listen__[_vmPath].call(that.data.__ob__,e,_index[_index.length-1]);
+                if(__funkey!=_vmPath){
+                    that.back.__listen__[__funkey] &&that.back.__listen__[__funkey].call(that.data.__ob__,e,_index[_index.length-1]);
+                }
+                                
+                  //�������鴦��
                 var fatherPath=_vmPath.replace(/\.\d+$/,"");
                 var cDate=columnValueReg(defualtData,fatherPath,round);
                 if(vm=="length"&&Array.isArray(cDate.__ob__)){
@@ -648,20 +661,6 @@
                 }else{
                     _defineReRend.call(this,_vmPath,defualtData,back,upRegKeys,that.config);
                 }
-                //$watch
-                var obj = {};
-                var __funkey=_vmPath.replace(/\.\d+./,".").replace(/\.\d+$/,"");
-                var _index=_vmPath.split(".");
-                if(!(/^\d+$/).test(_index[_index.length-1])){
-                    _index.pop();
-                }
-                that.back.__listen__[_vmPath] && that.back.__listen__[_vmPath].call(obj,e,_index[_index.length-1]);
-                if(__funkey!=_vmPath){
-                    that.back.__listen__[__funkey] && that.back.__listen__[__funkey].call(obj,e,_index[_index.length-1]);
-                }
-                for (var b in obj) {
-                    this.__ob__[b] = obj[b]
-                }//end
             },
             get: function() {
                 return this.__ob__[vm]
