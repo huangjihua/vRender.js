@@ -191,17 +191,17 @@ ok:func2
 2015-12-24
 ```
 
-##建立虚拟view,id前边加“vDis"
+##引用一个隐藏的view
 
 ```code
-<div id="div1"></div>
-<div id="vDisdiv1" style="display:none">
+<div id="view"></div>
+<div id="view2" style='display:none'>
     {{value}}
     <br>
     {{made||"无"}}
 </div>
 <script>
-    vRender.render("div1",{value:"hello"})
+    vRender.render("div1",{value:"hello"},{view:'veiw2'});
 </script>
 ```
 ###渲染结果
