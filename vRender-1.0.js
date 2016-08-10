@@ -12,7 +12,7 @@
             for(var a in e.__ob__){
                 newe[a]=clearNewArray(e.__ob__[a]);
             }
-            return newe;
+            return newe;        
         }else{
             return e;
         }
@@ -50,7 +50,16 @@
                     value = _tm2.getFullYear() + "/" + (_tm2.getMonth() + 1) + "/" + _tm2.getDate()
                 }
             } else {
-             if (dataType) {
+                if (dataType == "image") {
+                    value = toImgUrl(value)
+                } else {
+                    if (dataType == "litImage") {
+                        value = toImgUrl(value, 1)
+                    } else {
+                        if (dataType == "smallImage") {
+                            value = toImgUrl(value, 2)
+                        } else {
+                            if (dataType) {
                                 var _tbol = true;
                                 switch ("function") {
                                     case typeof(this.config[dataType]):
@@ -66,6 +75,9 @@
                                     value = format(dataType, value)
                                 } else {}
                             }
+                        }
+                    }
+                }
             }
         }
         }
@@ -275,7 +287,7 @@
         _toReg = new RegExp("(\\(|\\)|\\[|\\]|\\||\\?|\\$)", "g")
     }
     createRegex();
-    function _angular(_str,dom,upRegKeys,round) {        
+    function _angular(_str,dom,upRegKeys,round) {             
         var str=_str,pstr=str.match(_getAll);        
         if(pstr){            
             var l=pstr.length;            
@@ -342,13 +354,13 @@
                         el.__childNodes.push(el.childNodes[j]);
                     }
                 }
-                el.newChildKey = childkey[0]; //Ҫ
+                el.newChildKey = childkey[0]; //脪陋
                 upRegKeys || (upRegKeys = {});
                 upRegKeys[childkey[0]] =childkey[1];
                 round || (round = {})
                 round[childkey[0]] = {};
                 _regKeys={upRegKeys:upRegKeys,round:round};
-                //����dom
+                //茂驴陆茂驴陆茂驴陆茂驴陆dom
                 var columnAr=columnPathReg(upRegKeys, childkey[1], round);
                 columnAr=_zsplits(columnAr);
                 var _vmPath=columnAr.join(".");
@@ -493,8 +505,7 @@
         var newArg={__ob__:res,length:res.length};
         for(var a in newArg.__ob__){
             if(a!="each"&&a!="__ob__"){
-                newArg[a]=newArg.__ob__[a];
-                //__defineProperty.call(this, res, a, _vmPath, data, back, upRegKeys,round);
+                newArg[a]=newArg.__ob__[a];                
             }
         }
         __defineProperty.call(this, newArg, "length", _vmPath, data, back, upRegKeys,round);
@@ -537,8 +548,7 @@
                         else{
                             value.__ob__ || (value.__ob__ = {});
                             __defineProperty.call(that, value, vm, _vmPath, data, back, upRegKeys,round);
-                            if(typeof(value[vm])!="object"){                                
-                                //����dom
+                            if(typeof(value[vm])!="object"){                                                                
                                 _saveDom(data,cElement,_vmPath,defaultText,round,upRegKeys);
                             }else{
                                 value=value[vm]
@@ -549,18 +559,20 @@
         }
     }
     function _vmRender(defualtData,_nodeel,upRegKeys){
-        this.data=defualtData;
-        if(_nodeel.el.nodeName=="#text"){
+        this.data=defualtData;        
+        if(_nodeel.el.nodeName=="#text"&&_nodeel.el.__defaultText){            
             var _value=_angular.call(this,_nodeel.el.__defaultText,"",_nodeel.upRegKeys,_nodeel.round);
             (_value!==_nodeel.el.textContent)&&(_nodeel.el.textContent=_value);
         }else{
             if(_nodeel.el.__childNodes){
                 _vmForRender.call({data:defualtData,back:this.back,config:this.config},_nodeel,upRegKeys,columnValueReg(defualtData,_nodeel._vmPath,_nodeel.round));
             }
+            if(_nodeel.el.__defaultText){
             var _value=_angular.call(this,_nodeel.el.__defaultText,"",_nodeel.upRegKeys,_nodeel.round);
             (_value!==_nodeel.el.name)&&(_nodeel.el.name=_value);
             value=_angular.call(this,_nodeel.el.__defaultText,"",_nodeel.upRegKeys,_nodeel.round);
             (_value!==_nodeel.el.value)&&(_nodeel.el.value=_value);
+            }
         }
         if(_nodeel.el.__vstr == 1) {
             _nodeel.el.innerHTML=_angular.call(this, _nodeel.el.__defaultText || _nodeel.el.innerHTML, "", upRegKeys, _nodeel.round);
@@ -568,10 +580,9 @@
     }
     function _vmForRender(_nodeel,upRegKeys,e){
         var i=(_nodeel.el.__childNodes.length)* e.length;
-        if(!_nodeel.el.childNodes[i]){
-            //׷���µ�
+        if(!_nodeel.el.childNodes[i]){            
             _vmForAppend.call(this,_nodeel,i,upRegKeys);
-        }else{//�Ƴ����
+        }else{
             while(_nodeel.el.childNodes[i]){
                 _nodeel.el.removeChild(_nodeel.el.childNodes[i]);
             }
@@ -580,8 +591,7 @@
     }
     function _defineReRend(_vmPath,defualtData,back,upRegKeys,config){
         defualtData.__obel__[_vmPath]&&defualtData.__obel__[_vmPath].each(function(_nodeel){
-            _vmRender.call({data:defualtData,back:back,config:config},defualtData,_nodeel,upRegKeys);
-            //�ж�Ҫɾ��Ķ�ڵ�����ӵĽڵ�
+            _vmRender.call({data:defualtData,back:back,config:config},defualtData,_nodeel,upRegKeys);            
             var data=columnValueReg(defualtData,_nodeel._vmPath,_nodeel.round);
             if(!_nodeel.el.__defaultText&&_nodeel.childs&&Array.isArray(data.__ob__)){
                 _vmForRender.call({data:defualtData,back:back},_nodeel,upRegKeys,data);
@@ -596,8 +606,7 @@
         date.__ob__[vm]=date[vm];
         var that=this;
         Object.defineProperty(date, vm, {
-            set: function(e) {            
-                //�������¸�ֵ
+            set: function(e) {                            
                 if(Array.isArray(e)){
                     var l= e.length;
                     if(e[l-1].__ob__){
@@ -621,14 +630,11 @@
                 if(__funkey!=_vmPath){
                     that.back.__listen__[__funkey] &&that.back.__listen__[__funkey].call(that.data.__ob__,e,_index[_index.length-1]);
                 }
-                                
-                  //�������鴦��
+                                                  
                 var fatherPath=_vmPath.replace(/\.\d+$/,"");
                 var cDate=columnValueReg(defualtData,fatherPath,round);
-                if(vm=="length"&&Array.isArray(cDate.__ob__)){
-                    //ѭ��
-                    defualtData.__obel__[fatherPath]&&defualtData.__obel__[fatherPath].each(function(_nodeel){
-                        //�ж�Ҫɾ��Ķ�ڵ�����ӵĽڵ�
+                if(vm=="length"&&Array.isArray(cDate.__ob__)){                    
+                    defualtData.__obel__[fatherPath]&&defualtData.__obel__[fatherPath].each(function(_nodeel){                        
                         if(_nodeel.el.__childNodes){
                             var data=columnValueReg(defualtData,_nodeel._vmPath,_nodeel.round);
                             var l=data.length;
@@ -639,8 +645,7 @@
                                         data[i].__ob__={};
                                     }else{
                                         data[i].__ob__=data[i].__ob__;
-                                    }
-                                    //_objdefine(date,i);
+                                    }                                    
                                 }
                             }
                         }
@@ -659,7 +664,7 @@
     e.vRender.render = function(el, data, _config) {
         return Render(el,data,_config);
     }
-    //����els
+    
     function _xunhuanWhil(child, newEl,config) {
         var _child = child.cloneNode();
         if(_child.nodeType!==3){
@@ -702,8 +707,7 @@
         var l = _nodeel.el.__childNodes.length;
         for (var i = 0; i < _baseRound; i++) {
             var n = 0;
-            while (n < l) {
-                //��Ⱦ
+            while (n < l) {                
                 _nodeel.round[_nodeel.el.newChildKey] = i;
                 if(_nodeel.el.childNodes[n+i*l]){
                     _vuRenderChild.call(this, _nodeel.el.childNodes[n+i*l], upRegKeys, _nodeel.round);
@@ -724,7 +728,7 @@
                     _copyAttri(child[n], _child);
                 }
                 _nodeel.el.appendChild(_child);
-                //��Ⱦ
+                
                 _nodeel.round[_nodeel.el.newChildKey] = _baseRound + i;
                 _vuRenderChild.call(this, _child, upRegKeys, _nodeel.round);
             }
@@ -733,7 +737,7 @@
     function strToNumberSuan(str) {
     var p=str.match(/[\d.]+\*[\d.]+/);  
     var values;
-    //3��
+    //3茂驴陆茂驴陆
     if(p){              
         values=p[0].split("*");
         values=values[0]*values[1];
