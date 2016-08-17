@@ -6,7 +6,7 @@
             e(this[i])
         }
     };
-    function clearNewArray(e){
+    function clearNewArray(e){        
         if(e.__ob__){
             var newe={};
             for(var a in e.__ob__){
@@ -17,10 +17,10 @@
             return e;
         }
     }
-    function fuzhivm(newObj,vm){
+    function fuzhivm(newObj,vm){      
         newObj[vm]=function(){
             var arg=[];
-            var l=arguments.length;
+            var l=arguments.length;            
             for(var i=0;i<l;i++){
                 arg.push(clearNewArray(arguments[i]));
             }
@@ -50,15 +50,6 @@
                     value = _tm2.getFullYear() + "/" + (_tm2.getMonth() + 1) + "/" + _tm2.getDate()
                 }
             } else {
-                if (dataType == "image") {
-                    value = toImgUrl(value)
-                } else {
-                    if (dataType == "litImage") {
-                        value = toImgUrl(value, 1)
-                    } else {
-                        if (dataType == "smallImage") {
-                            value = toImgUrl(value, 2)
-                        } else {
                             if (dataType) {
                                 var _tbol = true;
                                 switch ("function") {
@@ -75,9 +66,6 @@
                                     value = format(dataType, value)
                                 } else {}
                             }
-                        }
-                    }
-                }
             }
         }
         }
@@ -205,7 +193,7 @@
             var value=this.data;
             columnValue=columnPathReg(upRegKeys,columnValue,round);
             value=columnValueReg(value,columnValue,round);
-        }        
+        }
         if(this.dom){           
             __defineProperty2.call(this,columnValue,upRegKeys,round);
         }
@@ -216,7 +204,7 @@
             nodata = "";        
         this.dom=dom;
         this.defaultText=defaultText;
-        var arg1 = columnValue.indexOf("?");  
+        var arg1 = columnValue.indexOf("?");
         if((/[-*+\/]+/).test(columnValue)){                     
             var _columnValue=columnValue.replace(/\s+/g,"");
             var _values;
@@ -287,7 +275,7 @@
         _toReg = new RegExp("(\\(|\\)|\\[|\\]|\\||\\?|\\$)", "g")
     }
     createRegex();
-    function _angular(_str,dom,upRegKeys,round) {             
+    function _angular(_str,dom,upRegKeys,round) {
         var str=_str,pstr=str.match(_getAll);        
         if(pstr){            
             var l=pstr.length;            
@@ -364,26 +352,29 @@
                 var columnAr=columnPathReg(upRegKeys, childkey[1], round);
                 columnAr=_zsplits(columnAr);
                 var _vmPath=columnAr.join(".");
-                _regKeys._nodeel = _saveDom(this.data, el, _vmPath, "", round, _regKeys);
-                if(columnAr.length==1){
-                    this.data[columnAr[0]]=_AryToObj.call(this, this.data[columnAr[0]],_vmPath, this.data, this.back, upRegKeys,round);
+                _regKeys._nodeel = _saveDom(this.data, el, _vmPath, "", round, _regKeys);  
+                this.data[columnAr[0]]||(this.data[columnAr[0]]=[]);
+                if(columnAr.length==1){       
+                    this.data[columnAr[0]].__ob__||(this.data[columnAr[0]]=_AryToObj.call(this, this.data[columnAr[0]],_vmPath, this.data, this.back, upRegKeys,round));
                     this.data.__ob__ || (this.data.__ob__ = {});
-                    this.data.__ob__[columnAr[0]] = this.data[columnAr[0]];
+                    this.data.__ob__[columnAr[0]] = this.data[columnAr[0]];                    
                     __defineProperty.call(this, this.data, columnAr[0], _vmPath, this.data, this.back, upRegKeys,round);
                 }else{
                     var vm=columnAr[columnAr.length-1];
                     columnAr.pop();
                     var data=columnValueReg(this.data,columnAr.join("."),round);
-                    data[vm]=_AryToObj.call(this, data[vm], _vmPath, this.data, this.back, upRegKeys,round);
+                    data[vm].__ob__||(data[vm]=_AryToObj.call(this, data[vm], _vmPath, this.data, this.back, upRegKeys,round));
                     data.__ob__ || (data.__ob__ = {});
-                    data.__ob__[vm] = data[vm];
+                    data.__ob__[vm] = data[vm];                    
                     __defineProperty.call(this, data, vm, _vmPath, this.data, this.back, upRegKeys,round);
-                }
+                }                                
             }
             else if(el.attributes[i].name.indexOf("v-on:")>-1){
+                window.ovon||(window.ovon=1);
                 var evName=el.attributes[i].name.replace("v-on:","");
                 var evFunc=el.attributes[i].value;
                 _bindEvent.call(this,el,evName,evFunc,upRegKeys,round);
+                window.ovon++;
             }
             else if(el.attributes[i].name=="v-str") {
                 el.__vstr="1";
@@ -406,11 +397,11 @@
         return _regKeys;
     }
     function _vuRenderChild(child,upRegKeys,round){
-        if(child.nodeType==3){//#text
+        if(child.nodeType===3){//#text
             var _value=_angular.call(this,child.__defaultText||child.textContent,child,upRegKeys,round);
             (_value!==child.textContent)&&(child.textContent=_value);
         }
-        else{
+        else if(child.nodeType===1){
             var regKeys=_rendereEl.call(this,child,upRegKeys,round);
             if(child.hasChildNodes()){
                 if(regKeys){
@@ -480,15 +471,15 @@
         if(_config.viewStr){
             el.innerHTML=_config.viewStr;
         }
-        datas.__obel__={};
-        var back=_createRetrun(datas);
+        datas.__obel__||(datas.__obel__={});
+        var back=_createRetrun(datas);        
         _vuRenderChild.call({data:datas,config:_config,back:back},el,"","");
         return back;
     }
     function __obel_push(vmpath,endObj){
         vmpath.push(endObj);
     }
-    function _saveDom(data,cElement,_vmPath,defaultText,round,upRegKeys){               
+    function _saveDom(data,cElement,_vmPath,defaultText,round,upRegKeys){
         var _round={};
         for(var a in round){
             _round[a]=round[a];
@@ -501,7 +492,7 @@
             return endObj;
         }
     }
-    function _AryToObj(res,_vmPath, data, back, upRegKeys,round){
+    function _AryToObj(res,_vmPath, data, back, upRegKeys,round){        
         var newArg={__ob__:res,length:res.length};
         for(var a in newArg.__ob__){
             if(a!="each"&&a!="__ob__"){
@@ -512,10 +503,10 @@
         var ar=["splice","push","shift","unshift","concat","pop"];
         ar.each(function(e){
             fuzhivm(newArg,e);
-        })
-        return newArg;
+        })        
+        return newArg;        
     }
-    function __defineProperty2(vmPath,upRegKeys,round){
+    function __defineProperty2(vmPath,upRegKeys,round){       
         var columnAr = columnPathReg(upRegKeys,vmPath,round);
         columnAr=_zsplits(columnAr);
         var value = this.data;
@@ -542,13 +533,13 @@
                 if(Array.isArray(value)){
                     value=value[vm]
                 }else{                    
-                        if(Array.isArray(value[vm])) {
-                            value[vm] = _AryToObj.call(that, value[vm], _vmPath, data, back, upRegKeys, round);
+                        if(Array.isArray(value[vm])) {                            
+                            value[vm].__ob__||(value[vm] = _AryToObj.call(that, value[vm], _vmPath, data, back, upRegKeys, round))
                         }
                         else{
-                            value.__ob__ || (value.__ob__ = {});
+                            value.__ob__ || (value.__ob__ = {});                            
                             __defineProperty.call(that, value, vm, _vmPath, data, back, upRegKeys,round);
-                            if(typeof(value[vm])!="object"){                                                                
+                            if(typeof(value[vm])!="object"){
                                 _saveDom(data,cElement,_vmPath,defaultText,round,upRegKeys);
                             }else{
                                 value=value[vm]
@@ -556,7 +547,7 @@
                         }                   
                 }
             })
-        }
+        }                
     }
     function _vmRender(defualtData,_nodeel,upRegKeys){
         this.data=defualtData;        
@@ -606,17 +597,21 @@
         date.__ob__[vm]=date[vm];
         var that=this;
         Object.defineProperty(date, vm, {
-            set: function(e) {                            
-                if(Array.isArray(e)){
-                    var l= e.length;
-                    if(e[l-1].__ob__){
+            set: function(e) {         
+             if(Array.isArray(e)){                    
+                    var l= e.length;                    
+                    if(l&&e[l-1].__ob__){
                         var _e=e[l-1];
                         e.pop();
-                        for(var i=0;i<l;i++){
-                            e.push(clearNewArray(_e[i]));
+                        for(var i=0;i<l;i++){                            
+                            if(_e[i]){
+                            e.push(clearNewArray(_e[i]));    
+                        }else{
+                              e.push(clearNewArray(_e));                              
+                        }
                         }
                     }
-                }
+                }              
                 this.__ob__[vm] = e;              
                 //$watch
                 var obj = {};                
@@ -632,8 +627,8 @@
                 }
                                                   
                 var fatherPath=_vmPath.replace(/\.\d+$/,"");
-                var cDate=columnValueReg(defualtData,fatherPath,round);
-                if(vm=="length"&&Array.isArray(cDate.__ob__)){                    
+                var cDate=columnValueReg(defualtData,fatherPath,round);                        
+                if(vm=="length"&&Array.isArray(cDate.__ob__)){   
                     defualtData.__obel__[fatherPath]&&defualtData.__obel__[fatherPath].each(function(_nodeel){                        
                         if(_nodeel.el.__childNodes){
                             var data=columnValueReg(defualtData,_nodeel._vmPath,_nodeel.round);
@@ -714,7 +709,7 @@
                 }
                 n++;
             }
-        }
+        }        
         var child=_nodeel.el.__childNodes;
         for (var i = 0; i < _round; i++) {
             for(var n=0;n<l;n++){
@@ -727,8 +722,7 @@
                     _copyEvent(child[n], _child,this.config);
                     _copyAttri(child[n], _child);
                 }
-                _nodeel.el.appendChild(_child);
-                
+                _nodeel.el.appendChild(_child);                
                 _nodeel.round[_nodeel.el.newChildKey] = _baseRound + i;
                 _vuRenderChild.call(this, _child, upRegKeys, _nodeel.round);
             }
@@ -757,7 +751,7 @@
                 str=str.replace(p[0],values);       
             }else{
                 p=str.match(/[\d.]?\-[\d.]+/);  
-                if(p){
+                if(p){                    
                     values=p[0].split("-");                 
                     values=values[0]*1-values[1]*1;
                     str=str.replace(p[0],values);       
