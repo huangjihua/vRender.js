@@ -50,6 +50,15 @@
                     value = _tm2.getFullYear() + "/" + (_tm2.getMonth() + 1) + "/" + _tm2.getDate()
                 }
             } else {
+                if (dataType == "image") {
+                    value = toImgUrl(value)
+                } else {
+                    if (dataType == "litImage") {
+                        value = toImgUrl(value, 1)
+                    } else {
+                        if (dataType == "smallImage") {
+                            value = toImgUrl(value, 2)
+                        } else {
                             if (dataType) {
                                 var _tbol = true;
                                 switch ("function") {
@@ -66,6 +75,9 @@
                                     value = format(dataType, value)
                                 } else {}
                             }
+                        }
+                    }
+                }
             }
         }
         }
@@ -333,8 +345,8 @@
         var l=el.attributes.length;
         var _regKeys;
         for(var i=0;i<l;i++){
-            if(el.attributes[i].name=="v-for"){
-                var childkey = el.attributes[i].value.split(/\s+in\s+/);
+            if(el.attributes[i].name=="v-for"){                
+                var childkey = el.attributes[i].value.split(/\s+in\s+/);                
                 if (!el.__childNodes) {
                     el.__childNodes = [];
                     var k = el.childNodes.length;
@@ -353,8 +365,8 @@
                 columnAr=_zsplits(columnAr);
                 var _vmPath=columnAr.join(".");
                 _regKeys._nodeel = _saveDom(this.data, el, _vmPath, "", round, _regKeys);  
-                this.data[columnAr[0]]||(this.data[columnAr[0]]=[]);
-                if(columnAr.length==1){       
+                this.data[columnAr[0]]||(this.data[columnAr[0]]=[]);                
+                if(columnAr.length==1){
                     this.data[columnAr[0]].__ob__||(this.data[columnAr[0]]=_AryToObj.call(this, this.data[columnAr[0]],_vmPath, this.data, this.back, upRegKeys,round));
                     this.data.__ob__ || (this.data.__ob__ = {});
                     this.data.__ob__[columnAr[0]] = this.data[columnAr[0]];                    
@@ -403,7 +415,7 @@
         }
         else if(child.nodeType===1){
             var regKeys=_rendereEl.call(this,child,upRegKeys,round);
-            if(child.hasChildNodes()){
+            if(child.hasChildNodes()||child.__childNodes){
                 if(regKeys){
                     regKeys.upRegKeys&&(upRegKeys=regKeys.upRegKeys);
                     regKeys.round&&(round=regKeys.round);
@@ -699,7 +711,7 @@
     function _vmForAppend(_nodeel, newI, upRegKeys,append) {
         var _baseRound = _nodeel.el.childNodes.length / _nodeel.el.__childNodes.length;
         var _round = append?append-_baseRound:(newI - _nodeel.el.childNodes.length) / _nodeel.el.__childNodes.length;
-        var l = _nodeel.el.__childNodes.length;
+        var l = _nodeel.el.__childNodes.length;        
         for (var i = 0; i < _baseRound; i++) {
             var n = 0;
             while (n < l) {                
