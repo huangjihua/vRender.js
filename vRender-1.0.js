@@ -30,7 +30,7 @@
         }
     }
 
-    function _createpType(value, dataType, msg, columnValue) {
+    function _createpType(value, dataType, msg, columnValue,round,upRegKeys) {
         if((/[^*+-\\/]+/g).test(dataType)){
         if (dataType == "time") {
             if (_num.test(value)) {
@@ -52,13 +52,26 @@
             } else {
                             if (dataType) {
                                 var _tbol = true;
+                                var that=this;
+        var _evFunc=columnValue.split(/[()]/);        
+        if(!_evFunc[_evFunc.length-1]){
+            _evFunc.pop();
+        }
+         var evArguments=[];         
+        if(_evFunc[0]){
+
+            var evArg=_evFunc[0].split(",");
+            evArg.each(function(arg){                
+                evArguments.push(_createObjValue.call(that,arg,upRegKeys,round));
+            })
+        }            
                                 switch ("function") {
                                     case typeof(this.config[dataType]):
-                                        value = this.config[dataType](value);
+                                        value = this.config[dataType]({},evArguments);
                                         _tbol = false;
                                         break;
                                     case typeof(window[dataType]):
-                                        value = window[dataType](value);
+                                        value = window[dataType].apply({},evArguments);
                                         _tbol = false;
                                         break
                                 }
@@ -288,7 +301,7 @@
                         funcs= pstr[i].replace(_reText, "");
                     } else{vm=vm[0]}
                 }                                                                                            
-                str = str.replace(pstr[i], _createpType.call(this,_createValue.call(this,vm,pstr[i].match(_getStatusV),dom,_str,upRegKeys,round), funcs, this.data, vm));
+                str = str.replace(pstr[i], _createpType.call(this,_createValue.call(this,vm,pstr[i].match(_getStatusV),dom,_str,upRegKeys,round), funcs, this.data, vm,round,upRegKeys));
             }
             
             return str
@@ -300,8 +313,8 @@
             evFunc="on"+evFunc;
         }
         return evFunc;
-    }
-    function _bindEvent(el,evName,evFunc,upRegKeys,round){
+    }    
+    function _bindEvent(el,evName,evFunc,upRegKeys,round){        
         var that=this;
         var _evFunc=evFunc.split(/[()]/);
         if(!_evFunc[_evFunc.length-1]){
@@ -311,11 +324,12 @@
         evFunc=_evFunc[0];
         if(_evFunc[1]){
             var evArg=_evFunc[1].split(",");
-            evArg.each(function(arg){
+            evArg.each(function(arg){                
                 evArguments.push(_createObjValue.call(that,arg,upRegKeys,round));
             })
 
         }
+
         if(that.config[evFunc]&&typeof(that.config[evFunc])=="function"){
             el[_evFuncReg(evName)]=function (){
                 this.$data=that.data;
