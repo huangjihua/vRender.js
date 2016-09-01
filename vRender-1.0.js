@@ -17,10 +17,14 @@
             return e;
         }
     }
-    function fuzhivm(newObj,vm){      
+    function fuzhivm(newObj,vm){ 
+
         newObj[vm]=function(){
             var arg=[];
-            var l=arguments.length;            
+            if(vm=="concat"&&arguments[0]&&arguments[0].length&&arguments[0][1].__ob__){                
+                arguments=arguments[0];                
+            }
+            var l=arguments.length;
             for(var i=0;i<l;i++){
                 arg.push(clearNewArray(arguments[i]));
             }
@@ -49,7 +53,7 @@
                 if (_tm2 != "Invalid Date") {
                     value = _tm2.getFullYear() + "/" + (_tm2.getMonth() + 1) + "/" + _tm2.getDate()
                 }
-            } else {
+            } else {                
                             if (dataType) {
                                 var _tbol = true;
                                 var that=this;
@@ -59,26 +63,25 @@
         }
          var evArguments=[];         
         if(_evFunc[0]){
-
             var evArg=_evFunc[0].split(",");
-            evArg.each(function(arg){                
+            evArg.each(function(arg){                         
                 evArguments.push(_createObjValue.call(that,arg,upRegKeys,round));
             })
-        }            
-                                switch ("function") {
-                                    case typeof(this.config[dataType]):
-                                        value = this.config[dataType]({},evArguments);
-                                        _tbol = false;
-                                        break;
-                                    case typeof(window[dataType]):
-                                        value = window[dataType].apply({},evArguments);
-                                        _tbol = false;
-                                        break
-                                }
-                                if (_tbol && /([yMdhms]+)/.test(dataType)) {
-                                    value = format(dataType, value)
-                                } else {}
-                            }
+        }
+            switch ("function") {
+                case typeof(this.config[dataType]):                                     
+                value = this.config[dataType].apply({},evArguments);
+                _tbol = false;
+                break;
+                case typeof(window[dataType]):
+                value = window[dataType].apply({},evArguments);
+                _tbol = false;
+                break
+                }
+                if (_tbol && /([yMdhms]+)/.test(dataType)) {
+                    value = format(dataType, value)
+                } else {}
+            }               
             }
         }
         }
@@ -124,7 +127,7 @@
         } else {
             if (_strReg.test(columnValue)) {
                 value = columnValue.replace(_strRegV, "")
-            } else {
+            } else {                
                 value=_createObjValue.apply(this,arguments);
             }
         }
@@ -206,17 +209,17 @@
             var value=this.data;
             columnValue=columnPathReg(upRegKeys,columnValue,round);
             value=columnValueReg(value,columnValue,round);
-        }
+        }        
         if(this.dom){           
             __defineProperty2.call(this,columnValue,upRegKeys,round);
         }
-        return typeof(value)=="object"?"":value
+        return value
     }
     function _createValue(columnValue,status,dom,defaultText,upRegKeys,round) {    
         var value = "",
             nodata = "";        
         this.dom=dom;
-        this.defaultText=defaultText;
+        this.defaultText=defaultText;        
         var arg1 = columnValue.indexOf("?");
         if((/[-*+\/]+/).test(columnValue)){                     
             var _columnValue=columnValue.replace(/\s+/g,"");
@@ -258,6 +261,7 @@
         } else {
             value = _judge.call(this,columnValue,upRegKeys,round);
         }
+
         if (status) {
             status = status[0];
             var p = status.replace(_rdkh, "").split(",");
@@ -278,7 +282,7 @@
     function createRegex() {
         _getText = "[^\\n(" + _outType[1] + ")(" + _outType[0] + ")]+";
         _getType = "(\\([^\\n(" + _outType[1] + ")(" + _outType[0] + ")]+\\)){0,1}";
-        _getTypeV = "[^*+-\\/"+_outType[1] + _outType[0]+"]+([^\\n" + _outType[1] + _outType[0] + "]+)";
+        _getTypeV = "[^*+-\\/"+_outType[1] + _outType[0]+"]([^\\n" + _outType[1] + _outType[0] + "]*)";
         _getStatus = "({[^\\n{}]+}){0,1}";
         _getStatusV = "([^\\n{}]+[:,]+[^\\n{}]+){1}";
         _reText = new RegExp(_getStatus + "(" + _outType[0] + "|" + _outType[1] + ")|" + _getType, "g");
@@ -294,13 +298,13 @@
             var l=pstr.length;            
             for(var i=0;i<l;i++){                
                 var funcs="";
-                var vm = pstr[i].match(_getTypeV);                                
+                var vm = pstr[i].match(_getTypeV);                  
                 if (vm) {                                
                     if((/[^*+-\\/]+\(/).test(vm)){                        
                         vm = vm[0].replace(/^[^(]+\(|\)$/g, "");
                         funcs= pstr[i].replace(_reText, "");
                     } else{vm=vm[0]}
-                }                                                                                            
+                }
                 str = str.replace(pstr[i], _createpType.call(this,_createValue.call(this,vm,pstr[i].match(_getStatusV),dom,_str,upRegKeys,round), funcs, this.data, vm,round,upRegKeys));
             }
             
@@ -493,20 +497,20 @@
     function __obel_push(vmpath,endObj){
         vmpath.push(endObj);
     }
-    function _saveDom(data,cElement,_vmPath,defaultText,round,upRegKeys){
+    function _saveDom(data,cElement,_vmPath,defaultText,round,upRegKeys){                
         var _round={};
         for(var a in round){
             _round[a]=round[a];
-        }
+        }                   
         if(cElement){
             data.__obel__[_vmPath]||(data.__obel__[_vmPath]=[]);
             var endObj={el:cElement,round:_round,upRegKeys:upRegKeys,_vmPath:_vmPath};
-            defaultText&&(endObj.el.__defaultText=defaultText);
-            data.__obel__[_vmPath].push(endObj);
+            defaultText&&(endObj.el.__defaultText=defaultText);            
+            data.__obel__[_vmPath].push(endObj);                        
             return endObj;
         }
     }
-    function _AryToObj(res,_vmPath, data, back, upRegKeys,round){        
+    function _AryToObj(res,_vmPath, data, back, upRegKeys,round){                
         var newArg={__ob__:res,length:res.length};
         for(var a in newArg.__ob__){
             if(a!="each"&&a!="__ob__"){
@@ -535,26 +539,27 @@
                 value=value[_vmPath];
             }
             columnAr.shift();
-        }
+        }                        
         if(typeof(value)!="object"){
             that.data.__ob__ || (that.data.__ob__ = {});
             __defineProperty.call(that, that.data, _vmPath, _vmPath, data, back, upRegKeys,round);
             _saveDom(data,cElement,_vmPath,defaultText,round,upRegKeys);
-        }else{
+        }else{            
             columnAr.each(function(columnAri) {
                 _vmPath+="."+columnAri;
                 var vm = columnAri.replace(/\[[-\d]+\]/, "");
                 if(Array.isArray(value)){
                     value=value[vm]
-                }else{                    
+                }else{                                        
                         if(Array.isArray(value[vm])) {                            
                             value[vm].__ob__||(value[vm] = _AryToObj.call(that, value[vm], _vmPath, data, back, upRegKeys, round))
                         }
                         else{
-                            value.__ob__ || (value.__ob__ = {});                            
-                            __defineProperty.call(that, value, vm, _vmPath, data, back, upRegKeys,round);
+                            value.__ob__ || (value.__ob__ = {});                                                        
+                            __defineProperty.call(that, value, vm, _vmPath, data, back, upRegKeys,round);                                          
+                            _saveDom(data,cElement,_vmPath,defaultText,round,upRegKeys);                        
                             if(typeof(value[vm])!="object"){
-                                _saveDom(data,cElement,_vmPath,defaultText,round,upRegKeys);
+                            
                             }else{
                                 value=value[vm]
                             }
@@ -563,24 +568,24 @@
             })
         }                
     }
-    function _vmRender(defualtData,_nodeel,upRegKeys){
+    function _vmRender(defualtData,_nodeel,upRegKeys,dom){
         this.data=defualtData;        
         if(_nodeel.el.nodeName=="#text"&&_nodeel.el.__defaultText){            
-            var _value=_angular.call(this,_nodeel.el.__defaultText,"",_nodeel.upRegKeys,_nodeel.round);
+            var _value=_angular.call(this,_nodeel.el.__defaultText,dom?_nodeel.el:"",_nodeel.upRegKeys,_nodeel.round);
             (_value!==_nodeel.el.textContent)&&(_nodeel.el.textContent=_value);
         }else{
             if(_nodeel.el.__childNodes){
                 _vmForRender.call({data:defualtData,back:this.back,config:this.config},_nodeel,upRegKeys,columnValueReg(defualtData,_nodeel._vmPath,_nodeel.round));
             }
             if(_nodeel.el.__defaultText){
-            var _value=_angular.call(this,_nodeel.el.__defaultText,"",_nodeel.upRegKeys,_nodeel.round);
+            var _value=_angular.call(this,_nodeel.el.__defaultText,dom?_nodeel.el:"",_nodeel.upRegKeys,_nodeel.round);
             (_value!==_nodeel.el.name)&&(_nodeel.el.name=_value);
-            value=_angular.call(this,_nodeel.el.__defaultText,"",_nodeel.upRegKeys,_nodeel.round);
+            value=_angular.call(this,_nodeel.el.__defaultText,dom?_nodeel.el:"",_nodeel.upRegKeys,_nodeel.round);
             (_value!==_nodeel.el.value)&&(_nodeel.el.value=_value);
             }
         }
         if(_nodeel.el.__vstr == 1) {
-            _nodeel.el.innerHTML=_angular.call(this, _nodeel.el.__defaultText || _nodeel.el.innerHTML, "", upRegKeys, _nodeel.round);
+            _nodeel.el.innerHTML=_angular.call(this, _nodeel.el.__defaultText || _nodeel.el.innerHTML, dom?_nodeel.el:"", upRegKeys, _nodeel.round);
         }
     }
     function _vmForRender(_nodeel,upRegKeys,e){
@@ -594,9 +599,9 @@
             _vmForAppend.call(this,_nodeel,i,upRegKeys, e.length);
         }
     }
-    function _defineReRend(_vmPath,defualtData,back,upRegKeys,config){
+    function _defineReRend(_vmPath,defualtData,back,upRegKeys,config,e){ 
         defualtData.__obel__[_vmPath]&&defualtData.__obel__[_vmPath].each(function(_nodeel){
-            _vmRender.call({data:defualtData,back:back,config:config},defualtData,_nodeel,upRegKeys);            
+            _vmRender.call({data:defualtData,back:back,config:config},defualtData,_nodeel,upRegKeys,typeof(e)=="object"?1:0);            
             var data=columnValueReg(defualtData,_nodeel._vmPath,_nodeel.round);
             if(!_nodeel.el.__defaultText&&_nodeel.childs&&Array.isArray(data.__ob__)){
                 _vmForRender.call({data:defualtData,back:back},_nodeel,upRegKeys,data);
@@ -611,21 +616,17 @@
         date.__ob__[vm]=date[vm];
         var that=this;
         Object.defineProperty(date, vm, {
-            set: function(e) {         
-             if(Array.isArray(e)){                    
-                    var l= e.length;                    
+            set: function(e) {
+                if(Array.isArray(e)){                    
+                    var l= e.length;
                     if(l&&e[l-1].__ob__){
-                        var _e=e[l-1];
-                        e.pop();
-                        for(var i=0;i<l;i++){                            
-                            if(_e[i]){
-                            e.push(clearNewArray(_e[i]));    
-                        }else{
-                              e.push(clearNewArray(_e));                              
-                        }
-                        }
+                        var _e=e[l-1];                                                
+                        for(var i=0;i<l;i++){
+                            e[i]=clearNewArray(e[i]);
+                        }                        
                     }
-                }              
+                }
+
                 this.__ob__[vm] = e;              
                 //$watch
                 var obj = {};                
@@ -638,11 +639,10 @@
                 that.back.__listen__[_vmPath] && that.back.__listen__[_vmPath].call(that.data.__ob__,e,_index[_index.length-1]);
                 if(__funkey!=_vmPath){
                     that.back.__listen__[__funkey] &&that.back.__listen__[__funkey].call(that.data.__ob__,e,_index[_index.length-1]);
-                }
-                                                  
+                }                                                
                 var fatherPath=_vmPath.replace(/\.\d+$/,"");
                 var cDate=columnValueReg(defualtData,fatherPath,round);                        
-                if(vm=="length"&&Array.isArray(cDate.__ob__)){   
+                if(vm=="length"&&Array.isArray(cDate.__ob__)){                       
                     defualtData.__obel__[fatherPath]&&defualtData.__obel__[fatherPath].each(function(_nodeel){                        
                         if(_nodeel.el.__childNodes){
                             var data=columnValueReg(defualtData,_nodeel._vmPath,_nodeel.round);
@@ -661,8 +661,8 @@
                         _vmRender.call({data:defualtData,back:back,config:that.config},defualtData,_nodeel,upRegKeys);
                     });
                 }else{
-                    _defineReRend.call(this,_vmPath,defualtData,back,upRegKeys,that.config);
-                }
+                    _defineReRend.call(this,_vmPath,defualtData,back,upRegKeys,that.config,e);
+                }                
             },
             get: function() {
                 return this.__ob__[vm]
@@ -737,8 +737,13 @@
                     _copyAttri(child[n], _child);
                 }
                 _nodeel.el.appendChild(_child);                
-                _nodeel.round[_nodeel.el.newChildKey] = _baseRound + i;
-                _vuRenderChild.call(this, _child, upRegKeys, _nodeel.round);
+                _nodeel.round[_nodeel.el.newChildKey] = _baseRound + i;                
+                var that={}
+                for(var th in this){
+                    that[th]=this[th];
+                }
+                that.dom=_child;
+                _vuRenderChild.call(that, _child, upRegKeys, _nodeel.round);
             }
         }
     }
