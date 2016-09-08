@@ -764,13 +764,12 @@
             str=str.replace(p[0],values);       
         }else{
             p=str.match(/-?[\d.]+\+-?[\d.]+/);              
-            if(p){                             
+            if(p){
                 values=p[0].split("+");                 
                 values=values[0]*1+values[1]*1;
                 str=str.replace(p[0],values);
             }else{                                
-                p=str.match(/[\d]?.?\-[\d.]+/);  
-                console.log(p)
+                p=str.match(/[\d]?.?\-[\d.]+/); 
                 if(p){                    
                     values=p[0].split("-");                 
                     values=values[0]*1-values[1]*1;
