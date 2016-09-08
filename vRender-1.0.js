@@ -750,26 +750,27 @@
     function strToNumberSuan(str) {
     var p=str.match(/[\d.]+\*[\d.]+/);  
     var values;
-    //3茂驴陆茂驴陆
-    if(p){              
+    //3茂驴陆茂驴陆    
+    if(p){          
         values=p[0].split("*");
         values=values[0]*values[1];
-        str=str.replace(p[0],values);
+        str=str.replace(p[0],values);    
     }else{
         //3y    
-        p=str.match(/[\d.]+\/[\d.]+/);  
+        p=str.match(/[\d.]+\/[\d.]+/);          
         if(p){      
             values=p[0].split("/");                 
             values=values[0]/values[1];     
             str=str.replace(p[0],values);       
         }else{
-            p=str.match(/-?[\d.]+\+-?[\d.]+/);  
-            if(p){                      
+            p=str.match(/-?[\d.]+\+-?[\d.]+/);              
+            if(p){                             
                 values=p[0].split("+");                 
                 values=values[0]*1+values[1]*1;
-                str=str.replace(p[0],values);       
-            }else{
-                p=str.match(/[\d.]?\-[\d.]+/);  
+                str=str.replace(p[0],values);
+            }else{                                
+                p=str.match(/[\d]?.?\-[\d.]+/);  
+                console.log(p)
                 if(p){                    
                     values=p[0].split("-");                 
                     values=values[0]*1-values[1]*1;
@@ -783,14 +784,14 @@
 }
 
 function strToNumber(str) {
-    var part;
-    while(str.match(/\([-*+\/0-9.]+\)/)){
-        part=str.match(/\([-*+\/0-9.]+\)/)[0];      
+    var part;    
+    while(str.match(/\([\-*+\/0-9.]+\)/)){
+        part=str.match(/\([\-*+\/0-9.]+\)/)[0];              
         str=str.replace(part,strToNumberSuan(part));
+    }        
+    while((/-?[\d]?.?[*\-+\/]+-?[\d.]+/).test(str)){
+        str=strToNumberSuan(str);           
     }    
-    while((/-?[\d.]?[*-+\/]+-?[\d.]+/).test(str)){
-        str=strToNumberSuan(str);   
-    }       
     return (str*1).toFixed(6)*1;
 }
 })(window);
