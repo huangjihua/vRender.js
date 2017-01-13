@@ -11,10 +11,12 @@
             if(typeof(elview)=="string"){
                 elview=document.getElementById(elview);
             }
+            el.__childNodes=undefined;
             el.innerHTML=elview.innerHTML;
             elview.parentNode.removeChild(elview);
         }
         if(_config.viewStr){
+            el.__childNodes=undefined;
             el.innerHTML=_config.viewStr;
         }
         if(el){
@@ -52,7 +54,9 @@
                 _bindEvent.call(this,el,evName,evFunc);                
             }        
             else if(el.attributes[i].name=="v-str"||el.attributes[i].name=="v-html") {
-                el.__vstr="1";                
+                if(!el.__defaultText){
+                    el.__defaultText=el.innerHTML;
+                }
                 el.innerHTML=_angular.call(this, el.__defaultText || el.innerHTML, el);                
             }
             else if(el.attributes[i].name=="v-model"){                
@@ -90,12 +94,20 @@
     function vInsertAfter(newChild,child,parentNode){
         parentNode.insertBefor(newChild,child.nextSibling);
     }
-
+    function copyRound(obj){
+        var nobj={}
+        for(var avm in obj){
+            nobj[avm]=obj[avm];
+        }
+        return nobj;
+    }
     function vrVfor(el,attr){
         var childkey = attr.split(/\s+in\s+/);                
-        el.__nKey = childkey[0];                
-        this.upRegKeys[childkey[0]] =childkey[1];                
-        this.round[childkey[0]] = 0;
+        el.__nKey = childkey[0];
+        this.upRegKeys=copyRound(this.upRegKeys);
+        this.round=copyRound(this.round);
+        this.upRegKeys[childkey[0]]={value:childkey[1]};
+        this.round[childkey[0]] ={value:0};
         if (!el.__childNodes) {
             el.__childNodes = [];
             var k = el.childNodes.length;
@@ -121,16 +133,16 @@
             var vm=columnAr[columnAr.length-1];
             columnAr.pop();
 
-            var data=columnValueReg(this.data,columnAr.join("."),this.round);
+            var data=columnValueReg(this.data,columnAr.join("."));
             if(data[vm]===undefined){
-            	data[vm]="";
+                data[vm]="";
             }
             data[vm].__ob__||(data[vm]=_AryToObj.call(this, data[vm], _vmPath,el));
             data.__ob__ || (data.__ob__ = {});
             data.__ob__[vm] = data[vm];
             __defineProperty.call(this, data, vm, _vmPath, this.data, this.back);
         }
-        vVforDom.call(this,el,columnValueReg(this.data,_vmPath,this.round),childkey[0]);
+        vVforDom.call(this,el,columnValueReg(this.data,_vmPath),childkey[0]);
     }
 
     function vVforDom(el,data,nKey){
@@ -170,7 +182,7 @@
     function beforeVfor(el,cDF,startN){
         el.insertBefore(cDF,el.childNodes[startN]);
     }
-    function afterVfor(el,cDF,startN,upRegKeys,round){        
+    function afterVfor(el,cDF,startN){        
         if(startN==el.childNodes.length){
             el.appendChild(cDF);
         }else{
@@ -182,7 +194,8 @@
         var child=el.__childNodes;
         var l=child.length;
         for(var i=0;i<count;i++){
-        	this.round[nKey]++;
+            this.round=copyRound(this.round);
+            this.round[nKey]={value:this.round[nKey].value+1};
         for(var n=0;n<l;n++){
             var _child = child[n].cloneNode();
             if (child[n].__defaultText) {
@@ -204,7 +217,6 @@
             _vuRenderChild.call(this, _child);
         }
         }
-        this.round[nKey]=0;
         return cDF;
     }
 
@@ -286,14 +298,12 @@
     }
     function jiuzheng(el,newObj,nwl,arg,anc,_vmPath){
         for(var i=nwl-1;i>arg-1;i--){
-           // __defineProperty.call(this,newObj,i,_vmPath);
-            newObj[i].__obel__&&newObj[i].__obel__.each(function(obe){
-                obe.round[el.__nKey]=obe.round[el.__nKey]+anc;
-            })
+            newObj[i].__obel__[0].round[el.__nKey].value=newObj[i].__obel__[0].round[el.__nKey].value+anc;
         }
     }
     function vArrayEvent(vm,newObj,el,_vmPath){
-        var that=this;
+        var that=copyRound(this);
+        that.round=copyRound(that.round);
         return function(){  
             var arg=[];
             var l=arguments.length;
@@ -311,26 +321,25 @@
                 Array.isArray(arguments)&&Array.isArray(arguments[0])&&arguments[0][1]&&arguments[0][1].__ob__&&(arguments=arguments[0]);
                 break;
                 case "unshift":
-                this.__obel__.each(function(obel){                    
-                    obel.round[el.__nKey]+=argl;
-                });
                 for(var i=newObj.length-1;i>obl-1;i--){
                     newObj[i]=newObj.__ob__[i];
                 }
-                jiuzheng.call(that,el,newObj,newObj.length,argl,argl,_vmPath);
-                that.round[el.__nKey]=-1;
-                el.insertBefore(appVfor.call(that,el,argl,1,el.__nKey),el.childNodes[0]);
+                var newTath=copyRound(that);
+                newTath.round=copyRound(newTath.round);
+                newTath.round[el.__nKey]={value:-1};
+                el.insertBefore(appVfor.call(newTath,el,argl,1,el.__nKey),el.childNodes[0]);
+                jiuzheng(el,newObj,newObj.length,argl,argl,_vmPath);
                 break;
                 case "push":
                 for(var i=obl;i<newObj.length;i++){
                     newObj[i]=newObj.__ob__[i];
                 }
-                that.round[el.__nKey]=newObj.length-argl-1;
+                that.round[el.__nKey].value=newObj.length-argl-1;
                 el.appendChild(appVfor.call(that,el,argl,-1,el.__nKey));
                 break;
                 case "shift":
                 delVfor(el,0*cN,1*cN);
-                jiuzheng.call(that,el,newObj,newObj.length,0,1*-1,_vmPath);
+                jiuzheng(el,newObj,newObj.length,0,1*-1,_vmPath);
                 break;
                 case "pop":
                 delVfor(el,newObj.length+1*cN,(newObj.length)*cN);
@@ -341,26 +350,32 @@
                     var chaH=arguments[1]-newArgN;
                     if(newArgN){
                         if(chaH>0){//新增数少于原数，需删除
-                            that.round[el.__nKey]=arguments[0];
+                            that.round[el.__nKey].value=arguments[0];
                             revRender.call(that,el,arguments[0],arguments[0]+newArgN,cN,el.__nKey);
                             delVfor(el,(arguments[0]+newArgN)*cN,chaH*cN);
-                            jiuzheng.call(that,el,newObj,newObj.length,arguments[0]+chaH,chaH*-1,_vmPath);
+                            jiuzheng(el,newObj,newObj.length,arguments[0]+chaH,chaH*-1,_vmPath);
                         }else if(chaH==0){
+                            that.round[el.__nKey].value=arguments[0];
                             revRender.call(that,el,arguments[0],arguments[0]+newArgN,cN,el.__nKey);
                         }else{//新增数大于原数
                             var newObjl=newObj.length;
                             for(var i=newObjl+chaH;i<newObj.length;i++){
                                 newObj[i]=newObj.__ob__[i];
                             }
-                            that.round[el.__nKey]=newObjl-1;
-                            el.appendChild(appVfor.call(that,el,chaH*-1,-1,el.__nKey));
-                            that.round[el.__nKey]=arguments[0];
-                            revRender.call(that,el,arguments[0],newObjl,cN,el.__nKey);
+                            var addnum=newObj.length-obl;
+                            var endNum=arguments[0]+addnum;
+                            that.round[el.__nKey].value=arguments[0];
+                            revRender.call(that,el,arguments[0],endNum,cN,el.__nKey);
+                            var newTath=copyRound(that);
+                            newTath.round=copyRound(newTath.round);
+                            newTath.round[el.__nKey]={value:endNum-1};
+                            afterVfor(el,appVfor.call(newTath,el,chaH*-1,-1,el.__nKey),endNum);
+                            jiuzheng(el,newObj,newObj.length,endNum+1,addnum,_vmPath);
                             
                         }
                     }else{
                         delVfor(el,arguments[0]*cN,arguments[1]*cN);
-                        jiuzheng.call(that,el,newObj,newObj.length,arguments[0],arguments[1]*-1,_vmPath);
+                        jiuzheng(el,newObj,newObj.length,arguments[0],arguments[1]*-1,_vmPath);
                     }
                     break;
                 }    
@@ -478,20 +493,20 @@
         }
         return ar;
     }
-    function columnPathReg(columnValue){        
+    function columnPathReg(columnValue){
         var columnAr=_zsplits(columnValue);
         if(this.upRegKeys&&this.upRegKeys[columnAr[0]]){
             var columnFirst=columnAr[0];
-            columnFirst=columnPathReg.call(this,this.upRegKeys[columnAr[0]]);
+            columnFirst=columnPathReg.call(this,this.upRegKeys[columnAr[0]].value);
             if(this.round&&this.round[columnAr[0]]!==undefined){
-                columnAr[0]=this.round[columnAr[0]];
+                columnAr[0]=this.round[columnAr[0]].value;
             }
             columnAr.unshift(columnFirst);
         }
         return columnAr.join(".");
     }
 
-    function columnValueReg(value,columnValue,round){   
+    function columnValueReg(value,columnValue){
         var columnAr = _zsplits(columnValue);
         var l=columnAr.length;
         for(var i=0;i<l;i++){
@@ -531,20 +546,19 @@
             columnValue=columnPathReg.call(this,columnValue);             
             var columnAr = _zsplits(columnValue);
             value = this.data;            
-            var oldChildKey=columnValueReg(value,columnValue,this.round);                       
+            var oldChildKey=columnValueReg(value,columnValue);                       
             value=oldChildKey;
         }else {
             var value=this.data;
             columnValue=columnPathReg.call(this,columnValue);
-            value=columnValueReg(value,columnValue,this.round);
+            value=columnValueReg(value,columnValue);
         }        
         if(this.dom){
             __defineProperty2.call(this,columnValue);
         }
         return value
     }
-    function _createValue(columnValue,status,dom) {     
-
+    function _createValue(columnValue,status,dom) {
         var value = "",
             nodata = "",nodataStatu;       
             if(!dom.__defaultText){
@@ -640,7 +654,7 @@
         }                
         return _createpType.call(this,_createValue.call(this,vm,pstr.match(_getStatusV),dom,_str), funcs, this.data, vm);        
     }
-    function _angular(_str,dom) {            	
+    function _angular(_str,dom) {               
         var str=_str,pstr=str.match(_getAll);        
         if(pstr){ 
             var l=pstr.length;            
@@ -688,17 +702,17 @@
             evArguments.each(function(evObj){
                 if(evObj.vm=="$index"){
                     var evsp=evObj.kl.split(".");
-                    evArg.push(evObj.value.__obel__[0].round[evsp[evsp.length-2]]);
+                    evArg.push(evObj.value.__obel__[0].round[evsp[evsp.length-2]].value);
                 }else{
 
                     evArg.push(evObj.vm?evObj.value[evObj.vm]:evObj.value);
                 }
             });
             if(that.config[evFunc]&&typeof(that.config[evFunc])=="function"){
-                that.config[evFunc].apply(this,evArg);
+                that.config[evFunc].apply(el,evArg);
             }
             else if(window[evFunc]&&typeof(window[evFunc])=="function"){
-                window[evFunc].apply(this,evArg);
+                window[evFunc].apply(el,evArg);
             }
         }
     }
@@ -729,10 +743,9 @@
         }
     }
   
-
     function _vSaveDom(vDate,cElement,vm){
         vDate.__obel__||(vDate.__obel__=[]);
-        vDate.__obel__.push({el:cElement,round:Object.clone(this.round),vm:vm});
+        vDate.__obel__.push({el:cElement,round:this.round,vm:vm});
     }
     function _AryToObj(res,_vmPath,el){                
         var newArg={__ob__:res,length:res.length};
@@ -749,7 +762,7 @@
         });
         return newArg;        
     }
-    function __defineProperty2(vmPath){        
+    function __defineProperty2(vmPath){
         var columnAr = columnPathReg.call(this,vmPath);
         columnAr=_zsplits(columnAr);
         var value = this.data;
@@ -815,21 +828,18 @@
                 if(date.__listen__&&date.__listen__[vm]){
                     date.__listen__[vm].call(date,e);
                 }
-                
-                date.__obel__.each(function(obel){
+                date.__obel__.each(function(obel){                  
                     if(obel.vm==vm){
+                        that.round=obel.round;
                         if(obel.el.nodeType==3){
-                            that.round=obel.round;                        
                             obel.el.textContent=(_angular.call(that,obel.el.__defaultText,""));
                         }else if(obel.el.nodeType==2){
-                            that.round=obel.round;
                             obel.el.value=(_angular.call(that,obel.el.__defaultText,""));
                             if(obel.el.name=="value"){
                                 obel.el.ownerElement.value=obel.el.value;
                             }
                         }else{
-                            that.round=obel.round;
-                            vVforDom.call(that,obel.el,columnValueReg(that.data,vm,that.round),obel.el.__nKey);
+                            vVforDom.call(that,obel.el,columnValueReg(that.data,vm),obel.el.__nKey);
                         }
                     }
                 })
@@ -840,7 +850,12 @@
         })
 
     };
-    e.vRender.render = function(el, data, _config) {
+    if(!e.vRender.render){
+        e.vRender.render = function(el, data, _config) {
+        return new Render(el,data,_config);
+        };
+    }
+    e.vRender.render2 = function(el, data, _config) {
         return new Render(el,data,_config);
     };
     function _xunhuanWhil(child, newEl,config) {
