@@ -393,20 +393,6 @@
         else if(dataType == "shortTime"){
             value =format("yyyy/MM/dd",value);
         }
-        else if (dataType == "times") {            
-            value =format("yyyy/MM/dd hh:mm:ss",new Date(value).getTime()-3600*8*1000);
-        }
-        else if(dataType == "shortTimes"){
-            value =format("yyyy/MM/dd",new Date(value).getTime()-3600*8*1000);
-        }
-        else if(dataType == "image"){
-            value = toImgUrl(value);
-        }else if(dataType == "litImage"){
-            value = toImgUrl(value, 1);
-        }
-        else if(dataType == "smallImage"){
-            value = toImgUrl(value, 2)
-        }
         else {            
             if (dataType) {
             var _tbol = true;
@@ -850,14 +836,11 @@
         })
 
     };
-    if(!e.vRender.render){
-        e.vRender.render = function(el, data, _config) {
-        return new Render(el,data,_config);
-        };
-    }
-    e.vRender.render2 = function(el, data, _config) {
-        return new Render(el,data,_config);
+
+    e.vRender.render = function(el, data, _config) {
+       return new Render(el,data,_config);
     };
+    
     function _xunhuanWhil(child, newEl,config) {
         var _child = child.cloneNode();
         if(_child.nodeType!==3){
