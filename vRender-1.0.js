@@ -301,9 +301,9 @@
             newObj[i].__obel__[0].round[el.__nKey].value=newObj[i].__obel__[0].round[el.__nKey].value+anc;
         }
     }
+
     function vArrayEvent(vm,newObj,el,_vmPath){
         var that=copyRound(this);
-        that.round=copyRound(that.round);
         return function(){  
             var arg=[];
             var l=arguments.length;
@@ -321,7 +321,7 @@
                 Array.isArray(arguments)&&Array.isArray(arguments[0])&&arguments[0][1]&&arguments[0][1].__ob__&&(arguments=arguments[0]);
                 break;
                 case "unshift":
-                for(var i=newObj.length-1;i>obl-1;i--){
+                for(var i=newObj.length-1;i>obl-argl-1;i--){
                     newObj[i]=newObj.__ob__[i];
                 }
                 var newTath=copyRound(that);
@@ -329,6 +329,8 @@
                 newTath.round[el.__nKey]={value:-1};
                 el.insertBefore(appVfor.call(newTath,el,argl,1,el.__nKey),el.childNodes[0]);
                 jiuzheng(el,newObj,newObj.length,argl,argl,_vmPath);
+                that.round[el.__nKey].value=newObj.length-argl;
+                revRender.call(that,el,newObj.length-argl,newObj.length,cN,el.__nKey);
                 break;
                 case "push":
                 for(var i=obl;i<newObj.length;i++){
@@ -340,6 +342,8 @@
                 case "shift":
                 delVfor(el,0*cN,1*cN);
                 jiuzheng(el,newObj,newObj.length,0,1*-1,_vmPath);
+                that.round[el.__nKey]={value:newObj.length-1};
+                revRender.call(that,el,newObj.length-1,newObj.length,cN,el.__nKey);
                 break;
                 case "pop":
                 delVfor(el,newObj.length+1*cN,(newObj.length)*cN);
@@ -354,28 +358,38 @@
                             revRender.call(that,el,arguments[0],arguments[0]+newArgN,cN,el.__nKey);
                             delVfor(el,(arguments[0]+newArgN)*cN,chaH*cN);
                             jiuzheng(el,newObj,newObj.length,arguments[0]+chaH,chaH*-1,_vmPath);
+                            var newTath=copyRound(that);
+                            newTath.round=copyRound(newTath.round);
+                            newTath.round[el.__nKey]={value:newObj.length-chaH};
+                            revRender.call(newTath,el,newObj.length-chaH,newObj.length,cN,el.__nKey);
                         }else if(chaH==0){
                             that.round[el.__nKey].value=arguments[0];
                             revRender.call(that,el,arguments[0],arguments[0]+newArgN,cN,el.__nKey);
                         }else{//新增数大于原数
                             var newObjl=newObj.length;
-                            for(var i=newObjl+chaH;i<newObj.length;i++){
-                                newObj[i]=newObj.__ob__[i];
-                            }
                             var addnum=newObj.length-obl;
                             var endNum=arguments[0]+addnum;
                             that.round[el.__nKey].value=arguments[0];
                             revRender.call(that,el,arguments[0],endNum,cN,el.__nKey);
+
+                            for(var i=newObj.length-1;i>newObj.length-addnum-1;i--){
+                                newObj[i]=newObj.__ob__[i];
+                            }
                             var newTath=copyRound(that);
                             newTath.round=copyRound(newTath.round);
                             newTath.round[el.__nKey]={value:endNum-1};
                             afterVfor(el,appVfor.call(newTath,el,chaH*-1,-1,el.__nKey),endNum);
                             jiuzheng(el,newObj,newObj.length,endNum+1,addnum,_vmPath);
-                            
+                            var that3=copyRound(that);
+                            that3.round=copyRound(that3.round);
+                            that3.round[el.__nKey]={value:newObj.length-addnum};
+                            revRender.call(that3,el,newObj.length-addnum,newObj.length,cN,el.__nKey);
                         }
                     }else{
                         delVfor(el,arguments[0]*cN,arguments[1]*cN);
                         jiuzheng(el,newObj,newObj.length,arguments[0],arguments[1]*-1,_vmPath);
+                        that.round[el.__nKey]={value:newObj.length-arguments[1]};
+                        revRender.call(that,el,newObj.length-arguments[1],newObj.length,cN,el.__nKey);
                     }
                     break;
                 }    
@@ -838,9 +852,8 @@
     };
 
     e.vRender.render = function(el, data, _config) {
-       return new Render(el,data,_config);
+        return new Render(el,data,_config);
     };
-    
     function _xunhuanWhil(child, newEl,config) {
         var _child = child.cloneNode();
         if(_child.nodeType!==3){
