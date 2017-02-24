@@ -19,9 +19,9 @@
             el.__childNodes=undefined;
             el.innerHTML=_config.viewStr;
         }
+        this.x=1;
         if(el){
         datas.__obel__||(datas.__obel__=[]);
-        this.back=_createRetrun(datas);
         this.data=datas;
         this.config=_config;
         this.el=el;
@@ -29,7 +29,39 @@
         this.round={};
         _rendereEl.call(this,el);
         }
-    }    
+    }
+    Render.prototype.__listen__={};
+
+    Render.prototype.$watch=function(key,callback){
+        var _key=key.replace(/\[/g,".").replace(/\]/g,"");
+        var _keysp=_key.split(".");
+        var _value=this.data;
+        var l=_keysp.length;
+        for(var i=0;i<l;i++){
+            if(typeof(_value[_keysp[i]])!="object"){
+                _value.__listen__||(_value.__listen__={});
+                _value.__listen__[_keysp[i]]=callback;
+            }else{
+                _value=_value[_keysp[i]];
+            }
+        }
+    };
+    Render.prototype.$set=function(key,value){
+        var _key=key.replace(/\[/g,".").replace(/\]/g,"");
+        var _keysp=_key.split(".");
+        var _value=this.data;
+        _keysp.each(function(e){
+            if(_value[e]==undefined){                       
+                _value[e]=value;
+            }else{
+                if(typeof(_value[e])!="object"){
+                    _value[e]=value;
+                }else{
+                    _value=_value[e];
+                }
+            }   
+        });
+    };
     function _vuRenderChild(el){
         if(el.nodeType===3){          
             _vrResultValue.call(this,el);
@@ -57,7 +89,16 @@
                 if(!el.__defaultText){
                     el.__defaultText=el.innerHTML;
                 }
-                el.innerHTML=_angular.call(this, el.__defaultText || el.innerHTML, el);                
+                el.innerHTML=_angular.call(this, el.__defaultText || el.innerHTML, el.attributes[i]);
+            }else if(el.attributes[i].name=="v-value"){
+                if(el.src){
+                    el.src=_angular.call(this, el.attributes[i].value, el.attributes[i]);
+                }else if(el.attributes["value"]){
+                    el.value=_angular.call(this, el.attributes[i].value, el.attributes[i]);
+                }
+                else{
+                    el.innerHTML=_angular.call(this, el.attributes[i].value, el.attributes[i]);    
+                }
             }
             else if(el.attributes[i].name=="v-model"){                
                 if(el.nodeName==="TEXTAREA"||el.nodeName==="INPUT"){                    
@@ -95,7 +136,7 @@
         parentNode.insertBefor(newChild,child.nextSibling);
     }
     function copyRound(obj){
-        var nobj={}
+        var nobj={};
         for(var avm in obj){
             nobj[avm]=obj[avm];
         }
@@ -107,7 +148,7 @@
         this.upRegKeys=copyRound(this.upRegKeys);
         this.round=copyRound(this.round);
         this.upRegKeys[childkey[0]]={value:childkey[1]};
-        this.round[childkey[0]] ={value:0};
+        this.round[childkey[0]]={value:0};
         if (!el.__childNodes) {
             el.__childNodes = [];
             var k = el.childNodes.length;
@@ -147,7 +188,7 @@
 
     function vVforDom(el,data,nKey){
         var cN=el.__childNodes.length;
-        var hasN=el.childNodes.length/cN;                
+        var hasN=el.childNodes.length/cN;
         var dN=data.length;
         if(hasN>dN){
             delVfor(el,dN*cN,(hasN-dN)*cN);            
@@ -156,13 +197,15 @@
             revRender.call(this,el,0,hasN,cN,nKey);
         }else{
             revRender.call(this,el,0,hasN,cN,nKey);
+            if(!hasN){this.round[nKey].value--;}
             el.appendChild(appVfor.call(this,el,data.length-hasN,1,nKey));
         }
     }
     function revRender(child,startN,endN,cN,nKey){
         for(var i=startN;i<endN;i++){
             if(i>startN){
-                this.round[nKey]++;
+                this.round=copyRound(this.round);
+                this.round[nKey]={value:this.round[nKey].value+1};
             }
             for(var j=i*cN;j<i*cN+cN;j++){
                 if(child.childNodes[j].nodeType===3){
@@ -250,39 +293,6 @@
             }                 
             }
             return newe;                
-    };
-   
-    Render.prototype.__listen__={};
-
-    Render.prototype.$watch=function(key,callback){
-        var _key=key.replace(/\[/g,".").replace(/\]/g,"");
-        var _keysp=_key.split(".");
-        var _value=this.data;
-        var l=_keysp.length;
-        for(var i=0;i<l;i++){
-            if(typeof(_value[_keysp[i]])!="object"){
-                _value.__listen__||(_value.__listen__={});
-                _value.__listen__[_keysp[i]]=callback;
-            }else{
-                _value=_value[_keysp[i]];
-            }
-        }
-    };
-    Render.prototype.$set=function(key,value){
-        var _key=key.replace(/\[/g,".").replace(/\]/g,"");
-        var _keysp=_key.split(".");
-        var _value=this.data;
-        _keysp.each(function(e){
-            if(_value[e]==undefined){                       
-                _value[e]=value;
-            }else{
-                if(typeof(_value[e])!="object"){
-                    _value[e]=value;
-                }else{
-                    _value=_value[e];
-                }
-            }   
-        });
     };
 
     function clearNewArray(e){        
@@ -716,33 +726,6 @@
             }
         }
     }
-
-    function _createRetrun(datas){
-        return {            
-            $watch: function(a, callback) {
-                if (typeof(a) == "string") {                    
-                    this.__listen__[a] = callback
-                }
-            },
-            $set:function(key,value){
-                var _key=key.replace(/\[/g,".").replace(/\]/g,"");
-                var _keysp=_key.split(".");
-                var _value=datas;
-                _keysp.each(function(e){                    
-                    if(_value[e]==undefined){                       
-                        _value[e]=value;
-                    }else{
-                        if(typeof(_value[e])!="object"){
-                            _value[e]=value;
-                        }else{
-                            _value=_value[e];
-                        }                    
-                   }   
-                });            
-            }
-        }
-    }
-  
     function _vSaveDom(vDate,cElement,vm){
         vDate.__obel__||(vDate.__obel__=[]);
         vDate.__obel__.push({el:cElement,round:this.round,vm:vm});
@@ -834,9 +817,23 @@
                         if(obel.el.nodeType==3){
                             obel.el.textContent=(_angular.call(that,obel.el.__defaultText,""));
                         }else if(obel.el.nodeType==2){
-                            obel.el.value=(_angular.call(that,obel.el.__defaultText,""));
+                            var value=(_angular.call(that,obel.el.__defaultText,""));
                             if(obel.el.name=="value"){
-                                obel.el.ownerElement.value=obel.el.value;
+                                obel.el.ownerElement.value=value;
+                            }else if(obel.el.name=="v-value"){
+                                if(obel.el.ownerElement.src){
+                                    obel.el.ownerElement.src=value;
+                                }else if(obel.el.ownerElement.value!==undefined&&obel.el.ownerElement.value!=value){
+                                    obel.el.ownerElement.value=value;
+                                }
+                                else{
+                                    obel.el.ownerElement.innerHTML=value;
+                                }
+                            }else if(obel.el.name=="v-str"||obel.el.name=="v-html"){
+                                obel.el.ownerElement.innerHTML=value;
+                            }
+                            else {
+                                obel.el.value=value;
                             }
                         }else{
                             vVforDom.call(that,obel.el,columnValueReg(that.data,vm),obel.el.__nKey);
